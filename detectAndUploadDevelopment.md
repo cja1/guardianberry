@@ -72,15 +72,13 @@ AWS_DEFAULT_REGION
 Store in /etc/environment for system-wide availability
 
 ```
-480x640 (no detections)time:1864.3ms 
+480x640 (no detections), time:1864.3ms 
 480x640 1 person, time:1812.6ms Started recording to yolov5/videos/1700370096.mp4
 480x640 1 person, time:1786.4ms Continuing recording
-480x640 1 person, time:1764.2ms Continuing recording
-480x640 1 person, time:1791.1ms Continuing recording
-480x640 1 person, time:1783.5ms Continuing recording
+[...]
 480x640 1 person, time:1783.3ms Continuing recording
-480x640 (no detections)time:1839.4ms No more people... stopped recording; yolov5/videos/1700370096.mp4 uploaded to S3; Local file deleted
-480x640 (no detections)time:1704.1ms 
+480x640 (no detections), time:1839.4ms No more people... stopped recording; yolov5/videos/1700370096.mp4 uploaded to S3; Local file deleted
+480x640 (no detections), time:1704.1ms 
 ```
 
 Auto launch on startup
@@ -103,3 +101,9 @@ crontab -e
 ```
 @reboot /bin/bash /home/admin/launch.sh
 ```
+
+```
+source /home/admin/yolov5/env/bin/activate
+python3 /home/admin/yolov5/detectAndUpload.py
+```
+
