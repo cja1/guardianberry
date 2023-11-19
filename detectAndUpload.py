@@ -92,8 +92,6 @@ def run():
 
             if len(det):
                 #We have detected a person
-
-                #Annotate the image
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
@@ -138,7 +136,7 @@ def run():
                         #Already recording but hit max duration: stop recording and trigger upload
                         is_recording = False
                         vid_writer.release()
-                        rename_local_file(save_path_and_file, recording_start_time, max_people_found, max_confidence)
+                        rename_local_file(save_path_and_file, recording_start_time, max_people_found, max_confidence, dt.dt)
                         recording_msg = 'Hit max duration of ' + str(max_recording_duration) + 'secs... stopped recording; '
                         recording_msg += upload_to_aws()
 
@@ -147,7 +145,7 @@ def run():
                 if is_recording:
                     is_recording = False
                     vid_writer.release()
-                    rename_local_file(save_path_and_file, recording_start_time, max_people_found, max_confidence)
+                    rename_local_file(save_path_and_file, recording_start_time, max_people_found, max_confidence, dt.dt)
                     recording_msg = 'No more people... stopped recording; '
                     recording_msg += upload_to_aws()
 
@@ -156,32 +154,34 @@ def run():
             msg += '(no detections), '
         LOGGER.info(f"{msg}time:{dt.dt * 1E3:.1f}ms " + recording_msg)
 
-#Rename the file after closed - to encode the max people found and max_confidence data in the filename
-def rename_local_file(old_filename, recording_start_time, max_people_found, max_confidence):
-    new_filename = videos_directory + '/' + str(round(recording_start_time)) + '-' + str(max_people_found) + '-' + str(round(max_confidence * 100)) + '.mp4'
+#Rename the file after closed - to encode the start time, duration, max people found and max_confidence data in the filename
+def rename_local_file(old_filename, recording_start_time, max_people_found, max_confidence, inference_time_ms):
+    new_filename = videos_directory + '/' + str(round(recording_start_time)) + '-' + str(round(time.time() - recording_start_time)) \
+        + '-' + str(max_people_found) + '-' + str(round(max_confidence * 100)) + '-' + str(round(inference_time_ms * 1000)) + '.mp4'
     os.rename(old_filename, new_filename)
 
 #Try to upload all files in /videos/ directory to AWS S3. Delete files on successful upload. Return a string describing actions.
 def upload_to_aws():
+    msg = []
     for filename in os.listdir(videos_directory):
         file_path = videos_directory + '/' + filename
 
         if not os.path.isfile(file_path):
             continue
 
-        #Extract the starting timestamp and min / max people found and max_confidence from the filename
+        #Extract the metadata from the filename
         parts = filename.split('.')[0].split('-')
 
         #Create metadata to go with file
         metadata = { 'Metadata': {
             'rpi_serial_no': rpi_serial_no,
             'recording_start_time': parts[0],
-            'min_people_found': parts[1],
+            'duration_s': parts[1],
             'max_people_found': parts[2],
-            'max_confidence': parts[3]
+            'max_confidence': parts[3],
+            'inference_time_ms': parts[4]
         }}
 
-        msg = []
         try:
             # Upload the file with a random filename (use a v4 uuid)
             s3.upload_file(file_path, s3_bucket_name, str(uuid.uuid4()) + '.mp4', metadata)
