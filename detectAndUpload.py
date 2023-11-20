@@ -79,7 +79,7 @@ def run():
             # Inference
             pred = model(im, augment = False, visualize = False)
 
-            # NMS
+            # NMS to remove overlapping bounding boxes. Also pass [0] to set the desired classes to just people (class = 0)
             pred = non_max_suppression(pred, conf_thres, iou_thres, [0], False, max_det = 1000)
 
         recording_msg = ''

@@ -6,12 +6,12 @@ The hardware used:
 - Raspberry Pi Camera Module 2.1
 
 These instructions cover these steps:
-- [Install Raspberry Pi OS](#A.-Install-Raspberry-Pi-OS) 
-- [Setup Raspberry Pi for SSH access over Wifi](#B.-Setup-Raspberry-Pi-for-SSH-access-over-Wifi)
-- [Login to the Raspberry Pi over SSH](#C.-Login-to-the-Raspberry-Pi-over-SSH)
-- [Check the Raspberry Pi camera is working](#D.-Check-the-Raspberry-Pi-camera-is-working)
-- [Install the necessary software packages and YOLOv5](#E.-Install-the-necessary-software-packages-and-YOLOv5)
-- [Test YOLOv5](#F.-Test-YOLOv5)
+- Install Raspberry Pi OS
+- Setup Raspberry Pi for SSH access over Wifi
+- Login to the Raspberry Pi over SSH
+- Check the Raspberry Pi camera is working
+- Install the necessary software packages and YOLOv5
+- Test YOLOv5
 
 ## A. Install Raspberry Pi OS
 ### 1. Download the Raspberry Pi Imager
