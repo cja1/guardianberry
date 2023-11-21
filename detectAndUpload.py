@@ -219,6 +219,9 @@ def upload_videos_to_aws():
         #Create metadata to go with file
         metadata = { 'Metadata': {
             'rpi_serial_no': rpi_serial_no,
+            'model': weights,
+            'frame_rate': str(frame_rate),
+            'confidence_threshold': str(conf_thres),
             'recording_start_time': parts[0],
             'duration_s': parts[1],
             'max_people_found': parts[2],
