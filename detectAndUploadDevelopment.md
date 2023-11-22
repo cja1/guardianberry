@@ -7,8 +7,8 @@ The `detect.py` script was renamed to `detectAndUpload.py` and these steps taken
 - Create video files up to 20 seconds long when a person is detected
 - Embed metadata about the video in the local filename
 - Set up an AWS S3 bucket and IAM permissions
-- Upload the video file(s) to an AWS S3 bucket
-- Upload an image of then first detection frame
+- Upload the video file(s) to the AWS S3 bucket
+- Upload an image of the first detection frame
 - Autoload the script on RPi startup
 
 ## 1. Refactoring to remove unnecessary configuration options
@@ -82,12 +82,12 @@ else:
 
 ## 5. Embed metadata about the video in the local filename
 We want to capture certain pieces of metadata about the recording. These are:
-- recording_start_time: a timestamp when the recording started
-- duration: the video duration in seconds
-- max_people_found: the maximum number of people detected in the video
-- max_confidence a number representing the algorithm's confidence that the person is present
-- inference_time_ms: how long the inference algorithm took to run - this will be useful for optimisation later
-- width, height: the dimensions of the video
+- **recording_start_time**: a timestamp when the recording started
+- **duration**: the video duration in seconds
+- **max_people_found**: the maximum number of people detected in the video
+- **max_confidence** a number representing the algorithm's maximum confidence that a person is present
+- **inference_time_ms**: how long the inference algorithm took to run in milliseconds - this will be useful for optimisation later
+- **width**, **height**: the dimensions of the video
 
 There is a need to save this metadata locally along with the video in case the video upload fails and needs to be re-tried. A simple way to do this is to make the filename hold this metadata.
 
@@ -130,7 +130,7 @@ AWS_DEFAULT_REGION
 
 Note: I am likely to re-visit the approach to User credentials later in the project to further enhance security.
 
-## 7. Upload the video file(s) to an AWS S3 bucket
+## 7. Upload the video file(s) to the AWS S3 bucket
 
 A video upload may fail - for example due to a network failure. To handle this case the files are saved locally embedding the metadata as described above.
 
@@ -149,7 +149,7 @@ The function that handles this is `upload_videos_to_aws()` and this function get
 
 The files are stored in the S3 bucket with a random name - I use a [Universally Unique Identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier) - so there is no information about the videos embedded in the filenames. This is in the unlikely event of someone seeing the S3 bucket directory listing. In this case no personal information is visible.
 
-## 8. Upload an image of then first detection frame
+## 8. Upload an image of the first detection frame
 
 I quickly realised that the above approach has an important constraint: if the video is uploaded at the _end_ of 20 seconds of recording then it is not possible to send a user notification until after this has happened.
 
