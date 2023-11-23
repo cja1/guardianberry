@@ -24,6 +24,7 @@ export const handler = async (event) => {
 
     //Note: in the full version we need to lookup the rpiSerialNo and get the associated Home and the SNS Topic ARN
     //For this prototype we use the static SNS Topic ARN for guardianBerry_1
+    //Note also: date.toLocaleString() will use the timezone of the AWS server, not the user's timezone
     const topicArn = 'arn:aws:sns:eu-west-1:705936070782:guardianBerry_1';
     const message = 'INTRUDER ALERT! GuardianBerry detected an intruder in your home at '
       + date.toLocaleString() + " camera id: " + rpiSerialNo +'. Please login to your account to see the video.';

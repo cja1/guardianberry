@@ -177,6 +177,9 @@ Run the YOLOv5 detection with the video stream as the source:
 python3 detect.py --source=tcp://127.0.0.1:8888
 ```
 
+Example output
+![Example capture](images/exampleCapture.png)
+
 ### Standard SSH Run
 
 - SSH into the Raspberry Pi: `ssh admin@192.168.50.222`
