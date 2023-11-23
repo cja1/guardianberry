@@ -58,6 +58,7 @@ def run():
 
     #Webcam - load stream
     dataset = LoadStreams(stream_url, img_size = imgsz, stride = stride, auto = pt, vid_stride = 1)
+
     vid_writer = None
     is_recording = False
     recording_start_time = 0
@@ -71,10 +72,8 @@ def run():
 
         with dt:    #Use the profiler
             im = torch.from_numpy(im).to(model.device)
-            im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
+            im = im.float()  # uint8 to fp
             im /= 255  # 0 - 255 to 0.0 - 1.0
-            if len(im.shape) == 3:
-                im = im[None]  # expand for batch dim
 
             # Inference
             pred = model(im, augment = False, visualize = False)
@@ -89,7 +88,6 @@ def run():
             im0 = im0s[i].copy()
 
             msg = '%gx%g ' % im.shape[2:]  # print string
-            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             annotator = Annotator(im0, line_width = 3, example = str(names))
 
             if len(det):
@@ -219,7 +217,7 @@ def upload_videos_to_aws():
         #Create metadata to go with file
         metadata = { 'Metadata': {
             'rpi_serial_no': rpi_serial_no,
-            'model': weights,
+            'model': str(weights.absolute()),
             'frame_rate': str(frame_rate),
             'confidence_threshold': str(conf_thres),
             'recording_start_time': parts[0],
@@ -268,7 +266,7 @@ def check_and_launch_libcamera():
 
     # Launch libcamera-vid to stream on the stream_url with the frame_rate
     try:
-        subprocess.Popen(('libcamera-vid -n -t 0 --width 640 --height 480 --framerate ' + str(frame_rate) + ' --inline --listen -o ' + stream_url).split())
+        subprocess.Popen(('libcamera-vid -n -t 0 --width 1280 --height 960 --framerate ' + str(frame_rate) + ' --inline --listen -o ' + stream_url).split())
         LOGGER.info('libcamera-vid launched')
     except Exception as e:
         LOGGER.info('libcamera-vid failed to launch')

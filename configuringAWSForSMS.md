@@ -42,9 +42,27 @@ There are several languages available for writing Lambda functions including Nod
 I created a new Lambda function called `guardianBerryPublishToSNS1` together with a new IAM role with permission to run Lambda functions, get the metadata from S3 objects and publish SNS messages. The lambda create function screen is shown below:
 ![Create Lambda function](images/lambdaCreate.png)
 
-A subset of the new IAM role for the lambda function is shown below. Note that this restricts S3 access to the `guardianberry.images` and `guardianberry.videos` buckets, and restricts SNS Topic posting to topics that begin with `guardianBerry_`:
+A subset of the new IAM role for the lambda function is shown below. This restricts S3 access to the `guardianberry.images` bucket and restricts SNS Topic publishing to topics that begin with `guardianBerry_`:
 
-HERE!
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::guardianberry.images/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "sns:Publish",
+            "Resource": "arn:aws:sns:eu-west-1:705936070782:guardianBerry_*"
+        }
+    ]
+}
+```
 
 ## 3. Triggering the Lambda function on S3 file upload
 The final step is to setup a trigger from the S3 `PutObject` event on the `guardianberry.images` bucket to the `guardianBerryPublishToSNS1` lambda function.

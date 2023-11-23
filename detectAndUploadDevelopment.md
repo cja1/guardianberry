@@ -147,6 +147,10 @@ The function that handles this is `upload_videos_to_aws()` and this function get
 - **frame_rate**: The frame rate used in the Feature Prototype is `1` FPS. This is rather slow and I expect I will want to change this setting in future iterations.
 - **confidence_threshold**: The model confidence threshold is initially set to `0.255`. I expect to vary this parameter too in future iterations.
 
+An example of all the metadata for a video file stored in the S3 bucket `guardian.videos` is shown in the image below:
+![Video metadata](images/videoMetadata.png)
+
+
 The files are stored in the S3 bucket with a random name - I use a [Universally Unique Identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier) - so there is no information about the videos embedded in the filenames. This is in the unlikely event of someone seeing the S3 bucket directory listing. In this case no personal information is visible.
 
 ## 8. Upload an image of the first detection frame
