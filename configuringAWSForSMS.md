@@ -74,3 +74,30 @@ This is easy to do through the AWS console and is shown in the image below:
 Once this is all put together, the creation of a new file in the guardianberry.images folder triggers an SMS to the author's mobile phone number. Example SMS:
 
 ![SMS intruder alert example](images/smsIntruderAlert.jpeg)
+
+## Additional Notes
+### Increasing AWS SMS Send Limits
+- After sending and receiving around 10-15 SMSs as part of system testing the SMSs stopped arriving. I checked the Lambda function and whether the SNS Topic posting was resulting in an error - but this was not the case
+- I enabled logging of SMS delivery status into CloudWatch. From this I was able to see that the SMS send was resulting in a `No quota left for account` error. CloudWatch log below.
+```
+{
+    "notification": {
+        "messageId": "8c1de487-da4b-5c67-9d2a-b95f017e32b3",
+        "timestamp": "2023-11-23 04:45:41.264"
+    },
+    "delivery": {
+        "destination": "+65xxxxxxxx",
+        "smsType": "Transactional",
+        "providerResponse": "No quota left for account",
+        "dwellTimeMs": 118
+    },
+    "status": "FAILURE"
+}
+```
+- I raised a case with AWS to increase the monthly SMS send limit, and after this was processed the SMSs were once again successfully sent and received.
+ 
+### Sending Correct Date / Time
+- The Feature Prototype highlighted a problem that will need to be addressed in the next phase of development: the date and time needs to be relvative to each user's timezone.
+- This will require the system to capture each user's timezone, then use this to correctly format the date / time for each user.
+- This also means that a single SNS Topic for the home with one common message will not work, as we want to support users from the same Home but living in different timezones (for example, a holiday home).
+- I did consider removing the date / time part of the notification, but this seems to be a useful feature to keep.

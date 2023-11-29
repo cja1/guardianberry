@@ -2,3 +2,6 @@ node_modules/
 config/
 *.zip
 .DS_Store
+server
+api-*
+client-web
