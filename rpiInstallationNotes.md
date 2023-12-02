@@ -54,11 +54,19 @@ YOUR_USER_NAME:ENCRYPTED_PASSWORD
 ```
 where `YOUR_USER_NAME` is, for example, admin and `ENCRYPTED_PASSWORD` is the long string generated in step 3 above.
 
+### 5. Start the Raspberry Pi
+Put the SD card in the Raspberry Pi and plug in tht device.
+
 ## C. Login to the Raspberry Pi over SSH
 ### 1. Find the IP address of the Raspberry Pi
 The easiest way to do this is to login to your router and look at the connected clients. Typically the Raspberry Pi will a client name of 'raspberrypi'.
 
 If this is not possible you can download the [Fing app](https://www.fing.com/products/fing-app) to scan your local network.
+
+Notes:
+- If you do have a monitor and keyoard plugged-in to the RPi then you can easily find the RPi IP address by typing `hostname -I`.
+- If the RPi does not appear in the router or Fing app then you may need to login in to it using a keybaord and setup the wifi using `sudo raspi-config`.
+- To find the Raspberry Pi hardware version use the `cat /proc/cpuinfo` command.
 
 ### 2. Issue this command at the terminal:
 ```
@@ -77,9 +85,9 @@ Issue this command:
 ```
 libcamera-hello
 ```
-The monitor will show the camera image for 5 seconds. Increase the timeout by appending `-t [duration]sec`. Example:
+The monitor will show the camera image for 5 seconds. Increase the timeout by appending `-t [duration_in_ms]`. Example for 100 seconds:
 ```
-libcamera-hello -t 100sec
+libcamera-hello -t 100000
 ```
 
 _If you don't have a monitor_
@@ -109,9 +117,9 @@ sudo apt-get autoremove -y
 
 ### 2. Install Git, Python3 package manager and virtual environment manager
 ```
-sudo apt install git
-sudo apt install python3-pip
-sudo apt install python3-virtualenv
+sudo apt install git -y
+sudo apt install python3-pip -y
+sudo apt install python3-virtualenv -y
 ```
 
 ### 3. Create and activate a virtual environment to prevent package conflict
@@ -131,12 +139,16 @@ cd yolov5/
 pip install -r requirements.txt
 ```
 
+Then also need to install Open CV globally as the one installed as part of the requirements script doesn't work;
+```
+sudo apt install python3-opencv -y
+```
+
 **Notes**
+- Installing the requirements takes several minutes. Time to get a cup of tea.
 - If the installation fails with an error, may need to install torch separately. See [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/). Can also download `.whl` packages that fail to download using `wget`. Use `pip cache dir` command to find cache directory. Likely `/home/YOUR_USER_NAME/.cache/pip/`. Create a `wheels` directory here and place the `.whl` file in the `wheels` directory then `pip install` the dependency.
 
 - May also need to uninstall opencv-python `pip uninstall opencv-python` and then install the headless version `pip install opencv-python-headless`.
-
-- May also need to install Open CV globally using `sudo apt install python3-opencv` as the one installed as part of the requirements script doesn't work.
 
 To test OpenCV is installed and available, launch python on the command line and try to get the OpenCV version:
 ```
@@ -145,6 +157,7 @@ import cv2
 cv2.__version__
 exit()
 ```
+Should print something like `4.8.1` as the OpenCV version.
 
 ## F. Test YOLOv5
 Use the `detect.py` script that comes with YOLOv5. Per the [documentation](https://docs.ultralytics.com/guides/raspberry-pi) from Ultralytics, we need to edit the script to enable TCP streams via SSH or the CLI:
@@ -162,7 +175,7 @@ Comment out the view_img line:
 # view_img = check_imshow(warn=True)
 ```
 
-Do an initial run to force YOLO to download the default model weights file `yolov5s.pt`. Once the model is downloaded the script will use local image files in `~/yolov5/data/images` to look for objects and print out the results.
+Do an initial run to force YOLO to download the default model weights file `yolov5s.pt`. This is a 14Mb file so is likely to take a few seconds. Once the model is downloaded the script will use local image files in `~/yolov5/data/images` to look for objects and print out the results.
 ```
 python3 detect.py
 ```
@@ -176,7 +189,18 @@ Run the YOLOv5 detection with the video stream as the source:
 ```
 python3 detect.py --source=tcp://127.0.0.1:8888
 ```
+The results of objects detected will be streamed to the screen. Sample output:
+```
+0: 480x640 1 person, 2 chairs, 1 bed, 1651.1ms
+0: 480x640 1 person, 2 chairs, 1 bed, 1645.7ms
+0: 480x640 1 person, 2 chairs, 1 bed, 1673.8ms
+```
+After a while you can stop this and look at the video that has been recorded. This is saved to the `~/yolov5/runs/detect` directory. Each run creates a new `exp` directory. Look inside here and you will see a file names `127.0.0.mp4` which has the video with object detection overlay.
 
+You can retrieve the file using `scp`, example:
+```
+scp admin@192.168.50.222:~/yolov5/runs/detect/exp2/127.0.0.mp4 .
+```
 Example output
 ![Example capture](images/exampleCapture.png)
 
@@ -188,9 +212,3 @@ Example output
 - Run YOLO v5 detection: `python3 ~/yolov5/detect.py --source=tcp://127.0.0.1:8888`
 - The detection results will stream to the window
 
-Sample output:
-```
-0: 480x640 1 person, 2 chairs, 1 bed, 1651.1ms
-0: 480x640 1 person, 2 chairs, 1 bed, 1645.7ms
-0: 480x640 1 person, 2 chairs, 1 bed, 1673.8ms
-```
