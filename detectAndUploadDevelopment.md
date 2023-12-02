@@ -123,9 +123,9 @@ I created a profile which only grants `PutObject` permission to the `guardianber
 
 For the Feature Prototype I created an IAM User which adopted this Profile. The User credentials are stored in an environment variables per Boto3 [documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/configuration.html). I created these environment variables stored in `/etc/environment`:
 ```
-AWS_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY
-AWS_DEFAULT_REGION
+AWS_ACCESS_KEY_ID=""
+AWS_SECRET_ACCESS_KEY=""
+AWS_DEFAULT_REGION="eu-west-1"
 ```
 
 Note: I am likely to re-visit the approach to User credentials later in the project to further enhance security.
@@ -138,11 +138,26 @@ After a recording finishes, _all_ local videos are uploaded - including ones tha
 
 I installed the python `boto3` library for easy AWS commands
 ```
+source env/bin/activate
 pip install boto3
 ```
 
 The function that handles this is `upload_videos_to_aws()` and this function gets all the videos in the `yolov5/videos` directory and steps through each one, extracting the metadata and using the `boto3` `upload_file()` command to send the file to AWS S3 along with the metadata. In addition to the metadata described above, there are 4 additional pieces of metedata sent:
-- **rpi_serial_no**: we need a way to uniquely identify each RPi that connects to the system. It turns out that each RPi has a serial number. I wrote a function called `get_rpi_serial_number()` that extracts this by reading the `/proc/cpuinfo` file and searching for the `Serial...` line.
+- **rpi_serial_no**: we need a way to uniquely identify each RPi that connects to the system. It turns out that each RPi has a serial number which can be accessed via `cat /proc/cpuinfo`. I wrote a function called `get_rpi_serial_number()` that extracts this by reading the `/proc/cpuinfo` file and searching for the `Serial...` line. Code:
+```
+def get_rpi_serial_number():
+    try:
+        with open('/proc/cpuinfo', 'r') as f:
+            for line in f:
+                #Looking for the line like 'Serial...'
+                if line.startswith('Serial'):
+                    return line.split(':')[1].strip()
+
+    except Exception as e:
+        LOGGER.info(f'Error retrieving Raspberry Pi serial number: {e}')
+        return None
+```
+
 - **model**: I decided to pass the model used because I envisage a later stage of the project will try alternative models and I will want to be able to compare their performance.
 - **frame_rate**: The frame rate used in the Feature Prototype is `1` FPS. This is rather slow and I expect I will want to change this setting in future iterations.
 - **confidence_threshold**: The model confidence threshold is initially set to `0.255`. I expect to vary this parameter too in future iterations.
@@ -170,17 +185,21 @@ I created a new S3 bucket for these images called `guardianberry.images` with th
 I wanted the `detectAndUpload.py` script to automatically load when the RPi started. To do this I created a simple launch script `launch.sh` that set the right python environment then launched the script:
 ```
 #!/bin/bash
-source /home/admin/yolov5/env/bin/activate
+source /home/admin/env/bin/activate
 python3 /home/admin/yolov5/detectAndUpload.py
 ```
 
-I made this script executable using `chmod +x /home/admin/launch.sh`
+I made this script executable using `sudo chmod +x /home/admin/launch.sh`
 
 Then I configure the Raspberry Pi to run the script at startup using `Crontab`:
 ```
 crontab -e
 ```
-I added this line to make RPi call the launch.sh script on reboot:
+I added this line at the end of the file to make RPi call the launch.sh script on reboot:
 ```
 @reboot /bin/bash /home/admin/launch.sh
+```
+Then I called `reboot` to check everything worked:
+```
+sudo reboot now
 ```

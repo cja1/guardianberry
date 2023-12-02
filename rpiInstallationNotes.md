@@ -74,7 +74,7 @@ ssh YOUR_USER_NAME@IP_ADDRESS
 ```
 Replacing `YOUR_USER_NAME` with the user name from the userconf file and `IP_ADDRESS` with the IP address of the Raspberry Pi. For example:
 ```
-ssh admin@192.168.50.221
+ssh admin@192.168.50.222
 ```
 Enter the password when prompted.
 
@@ -207,7 +207,7 @@ Example output
 ### Standard SSH Run
 
 - SSH into the Raspberry Pi: `ssh admin@192.168.50.222`
-- Launch the virtual environment: `source yolov5/env/bin/activate`
+- Launch the virtual environment: `source env/bin/activate`
 - Start the TCP stream on a background thread: `libcamera-vid -n -t 0 --width 1280 --height 960 --framerate 1 --inline --listen -o tcp://127.0.0.1:8888 &`
 - Run YOLO v5 detection: `python3 ~/yolov5/detect.py --source=tcp://127.0.0.1:8888`
 - The detection results will stream to the window

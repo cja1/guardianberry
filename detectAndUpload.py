@@ -59,6 +59,12 @@ def run():
     #Webcam - load stream
     dataset = LoadStreams(stream_url, img_size = imgsz, stride = stride, auto = pt, vid_stride = 1)
 
+    #Make directories if they don't exists
+    if not os.path.exists(images_directory):
+        os.mkdir(images_directory)
+    if not os.path.exists(videos_directory):
+        os.mkdir(videos_directory)
+
     vid_writer = None
     is_recording = False
     recording_start_time = 0
