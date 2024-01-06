@@ -2,7 +2,13 @@ node_modules/
 private/
 *.zip
 .DS_Store
-server
 api-*
 client-web
 todo.txt
+server/guardianberry.zip
+server/publish*.*
+server/swagger*.*
+server/guardianberry.zip
+server/widdershins.json
+server/lambda/package-lock.json
+server/deploy

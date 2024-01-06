@@ -1,0 +1,88 @@
+#!/bin/bash
+
+cd '/Users/callen/Documents/Personal/CompSci/CM3070/guardianberry/server'
+
+# Read dbs access variables for the test script - stored in private directory not uploaded to github
+. ../private/env_vars.sh
+
+# Setup the imported variables as environment variables
+export database=$DATABASE
+export host=$HOST
+export username=$USERNAME
+export password=$PASSWORD
+export COGNITO_USER_POOL_ID=$COGNITO_USER_POOL_ID
+
+# Setup colours for printing out - green for success, red for failure
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No colour
+
+UUID="" # Global var to hold the last UUID from test_endpoint function. Used for subsequent PATCH and DELETE calls
+HOME_UUID="" # Global var for home uuid
+USER_UUID="" # Global var for user uuid
+CAMERA_UUID="" # Global var for the camera uuid
+
+# Function to take an endpoint name (which matches the test parameters name in the test-params directory) and expected status code
+# then run the function locally and check the status code matches
+test_endpoint() {
+
+  # read in the test-params file, swap any instances of HOME_UUID, USER_UUID, CAMERA_UUID etc for the global vars
+  # then write out to temp file test.js
+  sed "s/HOME_UUID/$HOME_UUID/g ; s/USER_UUID/$USER_UUID/g ; s/CAMERA_UUID/$CAMERA_UUID/g ; s/USER_TEST_UUID/$USER_TEST_UUID/g ; s/USER_ADMIN_UUID/$USER_ADMIN_UUID/g ; s/BLANK_COGNITO_UUID/$BLANK_COGNITO_UUID/g" <test-params/$1.js >test-params/test.js
+
+  # run the function using lambda-local, passing in the test.js file with the calling parameters
+  response=$(lambda-local --esm -l lambda/$1.mjs -e test-params/test.js -t 30)
+
+  # Parse the response for the statusCode line like "statusCode": 401,
+  status_code_line=$(grep -E -o '"statusCode": [^,[:blank:]]+' <<< $response)
+
+  # extract just the number from status_code_line
+  value=$(grep -E -o "[0-9]+" <<< $status_code_line)
+
+  # check the number matches the expected status code - passed-in as the second function argument
+  if [ $value == "$2" ]; then
+    echo "${GREEN}$1 test success: $value${NC}"
+    # echo $response
+
+    # Also parse-out the first uuid value in the body - need to capture for subsequent PATCHing and DELETEing
+    uuid_line=$(grep -E -o '"uuid[^,[:blank:]]+' <<< $response)
+    uuids=$(grep -E -o '[0-9a-z-]+' <<< $uuid_line)
+    uuids_array=( $uuids )
+    # Store in global UUID
+    UUID=${uuids_array[1]}
+
+  else
+    echo "${RED}$1 test failure: $value${NC}"
+    # Also print-out the whole response
+    echo $response
+  fi
+}
+
+#Start test runs - checking each one returns a statusCode: 200 (GET, POST, PATCH) or 204 (DELETE)
+# Run all GETs
+test_endpoint "homesGet" 200
+test_endpoint "usersGet" 200
+test_endpoint "camerasGet" 200
+test_endpoint "eventsGet" 200
+test_endpoint "statsGet" 200
+
+#Now create a home, a user, a camera - saving the UUIDs of teh newly created objects for use with PATCH and DELETE commands
+test_endpoint "homesPost" 200
+HOME_UUID=$UUID     #Save the new home UUID for use later
+test_endpoint "usersPost" 200
+USER_UUID=$UUID     #Save the new user UUID for use later
+test_endpoint "camerasPost" 200
+CAMERA_UUID=$UUID   #Save the new camera UUID for use later
+
+# Now do PATCHes
+test_endpoint "homesPatch" 200
+test_endpoint "usersPatch" 200
+test_endpoint "camerasPatch" 200
+test_endpoint "eventsPatch" 200
+
+# Now do DELETEs
+test_endpoint "camerasDelete" 204
+test_endpoint "usersDelete" 204
+test_endpoint "homesDelete" 204
+
+
