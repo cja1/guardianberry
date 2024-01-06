@@ -1,5 +1,6 @@
 /*
 GuardianBerry database structure
+Created by Charles Allen for UOL CM3070 Final Project
 */
 
 SET NAMES utf8mb4;
