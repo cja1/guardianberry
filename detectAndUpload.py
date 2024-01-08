@@ -91,13 +91,14 @@ def run():
 
         # Process predictions
         for i, det in enumerate(pred):  # per image
-            im0 = im0s[i].copy()
-
             msg = '%gx%g ' % im.shape[2:]  # print string
-            annotator = Annotator(im0, line_width = 3, example = str(names))
 
             if len(det):
-                #We have detected a person
+                #We have detected a person - add box to image
+                im0 = im0s[i].copy()
+                annotator0 = Annotator(im0s[i].copy(), line_width = 3, example = str(names))
+                annotator1 = Annotator(im0s[i].copy(), line_width = 3, example = str(names))
+
                 # Rescale boxes from img_size to im0 size
                 det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
@@ -106,13 +107,13 @@ def run():
                     n = (det[:, 5] == c).sum()  # detections per class
                     msg += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
-                # Write results to annotator
+                # Write results to annotator 0 and 1. 0 has no confidence percentage - used for initial image upload.
                 for *xyxy, conf, cls in reversed(det):
                     c = int(cls)  # integer class
-                    label = f'{names[c]} {conf:.2f}'
-                    annotator.box_label(xyxy, label, color=colors(c, True))
+                    annotator0.box_label(xyxy, f'{names[c].title()}', color=colors(c, True))   # No confidence label for initial image
+                    annotator1.box_label(xyxy, f'{names[c].title()} {(conf * 100):.0f}%', color=colors(c, True))
 
-                im0 = annotator.result()
+                im0 = annotator1.result()   # includes the confidence percentage
 
                 #Save to video file with logic about max recording duration and minimum gap between recording start times
                 if not is_recording and (time.time() - recording_start_time > min_gap_between_video_start):
@@ -130,7 +131,7 @@ def run():
                     vid_writer.write(im0)
 
                     #Also write and upload to AWS this first image (plus any other images)
-                    save_image(im0, recording_start_time, max_confidence)
+                    save_image(annotator0.result(), recording_start_time, max_confidence)
                     upload_images_to_aws()
                     recording_msg = 'Started recording to ' + save_path_and_file
 
@@ -165,10 +166,10 @@ def run():
         LOGGER.info(f"{msg}time:{dt.dt * 1E3:.1f}ms " + recording_msg)
 
 #Save this image locally
-def save_image(im0, recording_start_time, confidence):
+def save_image(image, recording_start_time, confidence):
     filename = images_directory + '/' + str(round(recording_start_time))  + '-' + str(round(confidence * 100)) \
-        + '-' + str(im0.shape[1]) + '-' + str(im0.shape[0]) + '.jpg'
-    cv2.imwrite(filename, im0)
+        + '-' + str(image.shape[1]) + '-' + str(image.shape[0]) + '.jpg'
+    cv2.imwrite(filename, image)
 
 #Try to upload all files in /images/ directory to AWS S3. Delete files on successful upload.
 def upload_images_to_aws():
