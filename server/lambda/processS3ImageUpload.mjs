@@ -18,7 +18,7 @@ async function insertEvent(camera, fileKey, metadata) {
 	});
 }
 
-//Send notifications to each User associated with the Home of the Camera
+//Send notifications to each User associated with the Home of the Camera with sendNotifications set to true
 //Also create a Notification table entry
 async function sendNotifications(camera, event, metadata) {
 	const recordingStartTime = new Date(metadata.recording_start_time * 1000);
@@ -34,18 +34,15 @@ async function sendNotifications(camera, event, metadata) {
 		const promises = [];
 
 		users.forEach(user => {
-			//HERE: this approach needs to change
-	    const topicArn = 'arn:aws:sns:eu-west-1:705936070782:guardianBerry_1';
-
 	    const dateTimeString = recordingStartTime.toLocaleString(user.locale, { timeZone: user.timezone });
 	    const message = 'INTRUDER ALERT! GuardianBerry detected an intruder in your home at '
 	      + dateTimeString + ' with camera: ' + camera.name
-	      + '. Please log in to your account to see the video.';
+	      + '. Please log in to your account to watch the video.';
 	      
-	    //Publish message to topic ARN
-	    promises.push(sns.publish({ TopicArn: topicArn, Message: message }));
+	    //Publish message to relevant mobile phone number
+	    promises.push(sns.publish({ PhoneNumber: user.mobile, Message: message }));
 
-			//Also create a Notification table entry.
+			//Also create a Notification table entry
 			promises.push(models.Notification.create({
 				message: message,
 				UserId: user.id,
