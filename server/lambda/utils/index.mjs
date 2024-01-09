@@ -150,4 +150,16 @@ export async function generatePresignedImageUrls(keys) {
 export async function generatePresignedVideoUrls(keys) {
   return await generatePresignedUrls(S3_BUCKET_VIDEOS, keys);
 }
-
+//Export one image url and one video url
+export async function generatePresignedImageAndVideoUrl(imageKey, videoKey) {
+  var imageUrl;
+  return await generatePresignedUrl(S3_BUCKET_IMAGES, imageKey)
+  .then(response => {
+    imageUrl = response[imageKey];
+    return generatePresignedUrl(S3_BUCKET_VIDEOS, videoKey);
+  })
+  .then(response => {
+    const videoUrl = response[videoKey];
+    return [imageUrl, videoUrl];
+  });
+}

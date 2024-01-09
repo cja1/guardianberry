@@ -1,5 +1,5 @@
 import models from './models/index.mjs';
-import { extractUserMethodAndPath, accessControlHeaders, generatePresignedImageUrls, generatePresignedVideoUrl } from './utils/index.mjs';
+import { extractUserMethodAndPath, accessControlHeaders, generatePresignedImageUrls, generatePresignedImageAndVideoUrl } from './utils/index.mjs';
 import validator from 'validator';
 
 /**
@@ -20,6 +20,10 @@ import validator from 'validator';
  *           type: boolean
  *           description: Flag indicating whether this event has been viewed or not
  *           example: true
+ *         imageUrl:
+ *           type: string
+ *           description: The url of the image file that is the first captured image of this event (pre-signed url)
+ *           example: https://s3.eu-west-1.amazonaws.com/guardianberry.images/97bbeb12-3a52-4026-a450-117380d03c9f.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256
  *         recordingStartTimestamp:
  *           type: integer
  *           description: The unix timestamp in seconds of the event start
@@ -233,7 +237,7 @@ async function getEvent(homeId, uuid) {
   var event;
 
   return await models.Event.findOne({
-    attributes: ['uuid', 'isViewed', 'recordingStartTime', 'confidence', 'imageWidth', 'imageHeight', 'videoFilename', 'model', 'frameRate', 'confidenceThreshold', 'duration', 'maxPeopleFound', 'maxConfidence', 'inferenceTime', 'videoWidth', 'videoHeight'],
+    attributes: ['uuid', 'isViewed', 'imageFilename', 'recordingStartTime', 'confidence', 'imageWidth', 'imageHeight', 'videoFilename', 'model', 'frameRate', 'confidenceThreshold', 'duration', 'maxPeopleFound', 'maxConfidence', 'inferenceTime', 'videoWidth', 'videoHeight'],
     where: { uuid: uuid },
     include: [
       { model: models.Camera, attributes: ['uuid'], required: true, where: { HomeId: homeId }}
@@ -246,12 +250,14 @@ async function getEvent(homeId, uuid) {
     event['recordingStartTimestamp'] = event.recordingStartTime.getTime() / 1000;
     delete event.recordingStartTime;
 
-    //Generate pre-signed video URL
-    return generatePresignedVideoUrl(event.videoFilename)
+    //Generate pre-signed image and video URL
+    return generatePresignedImageAndVideoUrl(event.imageFilename, event.videoFilename);
   })
-  .then(presignedUrl => {
-    //Now set videoUrl to the presigned URL and delete videoFilename
-    event['videoUrl'] = presignedUrl;
+  .then(presignedUrls => {
+    //Now set imageUrl and videoUrl to the presigned URLs and delete image and videoFilename
+    event['imageUrl'] = presignedUrls[0];
+    delete event.imageFilename;
+    event['videoUrl'] = presignedUrls[1];
     delete event.videoFilename;
     return event;
   });
