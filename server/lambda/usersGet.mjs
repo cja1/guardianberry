@@ -1,5 +1,6 @@
 import models from './models/index.mjs';
 import { extractUserMethodAndPath, accessControlHeaders } from './utils/index.mjs';
+import validator from 'validator';
 
 /**
  * @swagger
@@ -19,6 +20,10 @@ import { extractUserMethodAndPath, accessControlHeaders } from './utils/index.mj
  *           type: string
  *           description: The notification content
  *           example: Intruder Alert!
+ *         timestamp:
+ *           type: integer
+ *           description: The unix timestanp in seconds of the notification
+ *           example: 1701003729
  * 
  *     User:
  *       type: object
@@ -106,7 +111,7 @@ async function getUsers(homeId, userId) {
       user['isMe'] = (user.id == userId);
       delete user.id;
 
-      //Create notificationCount and lastNotificationTimestamp
+      //Create timestanps for notifications
       user.Notifications.forEach((notification, j) => {
         user.Notifications[j]['timestamp'] = user.Notifications[j].createdAt.getTime() / 1000;
         delete user.Notifications[j].createdAt;
@@ -114,6 +119,71 @@ async function getUsers(homeId, userId) {
       out.push(user)
     });
     return out;
+  });
+}
+
+/**
+ * @swagger
+ *
+ * /users/{uuid}:
+ *   get:
+ *     tags:
+ *     - Users
+ *     summary: Gets a single user with their notifications
+ *     operationId: Get one event
+ *     parameters:
+ *       - name: uuid
+ *         in: path
+ *         description: The unique UUID for this user
+ *         required: true
+ *         schema:
+ *           type: string
+ *     security:
+ *       - oauth2: []
+ *     responses:
+ *       200:
+ *         description: successful operation
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               description: User object
+ *               $ref: '#/components/schemas/User' 
+ *       401:
+ *         description: unauthorised - invalid Authorisation token
+ *       404:
+ *         description: user not found
+ */
+
+//************************************
+// GET USER
+//************************************
+async function getUser(homeId, userId, uuid) {
+
+  var event;
+
+  return await models.User.findOne({
+    attributes: ['id', 'uuid', 'name', 'mobile', 'sendNotifications', 'locale', 'timezone'],
+    where: { HomeId: homeId, uuid: uuid },
+    include: [
+      { model: models.Notification, attributes:['uuid', 'message', 'createdAt'], required: false, order: [['id', 'DESC']] }
+    ]
+  })
+  .then(user => {
+    //Convert to POJO
+    user = user.get({ plain: true });
+
+    //Add isMe flag
+    user['isMe'] = (user.id == userId);
+    delete user.id;
+
+    //Create timestanps for notifications
+    user.Notifications.forEach((notification, j) => {
+      user.Notifications[j]['timestamp'] = user.Notifications[j].createdAt.getTime() / 1000;
+      delete user.Notifications[j].createdAt;
+    });
+
+    return user;
   });
 }
 
@@ -134,6 +204,15 @@ export const handler = async (event) => {
     switch (pathParameters.length) {
       case 0:   //like /users
         ret = await getUsers(homeId, userId);
+        break;
+
+      case 1:   //like /users/{uuid}
+        if (!validator.isUUID(pathParameters[0])) {
+          const err = new Error('Invalid UUID ' + pathParameters[0]);
+          err.status = 404;
+          throw err;
+        }
+        ret = await getUser(homeId, userId, pathParameters[0]);
         break;
 
       default:

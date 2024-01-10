@@ -241,8 +241,7 @@ async function getEvent(homeId, uuid) {
     where: { uuid: uuid },
     include: [
       { model: models.Camera, attributes: ['uuid'], required: true, where: { HomeId: homeId }}
-    ],
-    order: [[ 'id', 'DESC']]
+    ]
   })
   .then(thisEvent => {
     //Convert to POJO
