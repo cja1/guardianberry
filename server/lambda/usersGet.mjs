@@ -130,7 +130,7 @@ async function getUsers(homeId, userId) {
  *     tags:
  *     - Users
  *     summary: Gets a single user with their notifications
- *     operationId: Get one event
+ *     operationId: Get one user
  *     parameters:
  *       - name: uuid
  *         in: path
