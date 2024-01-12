@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GuardianBerry">
+    <meta name="author" content="Charles Allen">
+    <title>GuardianBerry Events</title>
+
+    <link rel="canonical" href="events.html">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="img/favicons/site.webmanifest">
+    <link rel="icon" href="img/favicons/favicon.ico">
+    <meta name="theme-color" content="#712cf9">
+
+    <!-- Custom styles -->
+    <link href="css/dashboard.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="dashboard.html">GuardianBerry</a>
+
+      <ul class="navbar-nav flex-row d-md-none">
+        <li class="nav-item text-nowrap">
+          <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <svg class="bi"><use xlink:href="img/sprite.svg#list"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div id="navbar" class="navbar w-100 collapse">
+        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+      </div>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+          <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="sidebarMenuLabel">GuardianBerry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" aria-current="page" href="dashboard.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#dashboard"/></svg>
+                    Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2 active" href="events.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#event"/></svg>
+                    Events
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="cameras.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#camera"/></svg>
+                    Cameras
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="users.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#people"/></svg>
+                    Users
+                  </a>
+                </li>
+              </ul>
+
+              <hr class="my-3">
+
+              <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="settings.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#gear-wide-connected"/></svg>
+                    Settings
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="#" id='logout'>
+                    <svg class="bi"><use xlink:href="img/sprite.svg#door-closed"/></svg>
+                    Sign out
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2" id='pageName'>Events</h1>
+          </div>
+
+          <div>
+            <div class="bd-example-snippet bd-code-snippet" id='eventsHeader'>
+              <!-- show a spinner while waiting for APIs to return -->
+              <div class="spinner-border text-secondary m-5" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
+            <div id='eventsContent'></div>
+          </div>
+
+        </main>
+      </div>
+
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-1 my-2 border-top">
+        <p class="col-md-4 mb-0 text-body-secondary small">© Charles Allen</p>
+
+        <a href="/dashboard.html" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <img class='img-rounded-corners' src="img/logo.png" alt="GuardianBerry logo" height="32">
+        </a>
+
+        <ul class="nav col-md-4 justify-content-end small">
+          <li class="nav-item"><a href="https://compsci.s3.eu-west-1.amazonaws.com/CM3070/api/index.html" class="nav-link px-2 text-body-secondary">API Specification</a></li>
+          <li class="nav-item"><a href="https://guardianberry.betteruptime.com" class="nav-link px-2 text-body-secondary">System Uptime</a></li>
+        </ul>
+      </footer>
+
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Event</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to permanently delete this event? This action can't be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id='deleteEventButton'>Delete event</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deleting spinner modal -->
+    <div class="modal fade" id="deletingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletingModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deletingModalLabel">Deleting Event</h1>
+          </div>
+          <div class="modal-body">
+            <div class="spinner-border text-secondary m-5" role="status">
+              <span class="visually-hidden">Deleting...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Video display modal -->
+    <div class="modal fade" id="videoModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="videoTitle">PLACEHOLDER</h1>
+          </div>
+          <div class="modal-body">
+
+            <video id="videoPreview" muted controls>
+              <source id="videoSource" src="#" type="video/mp4">
+            </video>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/color-modes.js"></script>
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/guardianberry.js"></script>
+
+<script>
+
+//Create a camera UUID -> name lookup. Used for easy updating the camera dropdown.
+var cameraLookup = {};
+//And one for timestamp -> datestring.
+var dateLookup = {};
+
+//Global var for the home (withn cameras)
+var home;
+//Global var to hold events
+var events;
+//Global var for this user
+var userMe;
+
+var selectedCameraUUID = null;
+var selectedDateString = null;
+
+//Event string formatter
+function eventHtml(eventCount) {
+  return '<span class="badge rounded-pill bg-secondary ms-2">' + eventCount.toLocaleString() + ' event' + ((eventCount == 1) ? '' : 's') + '</span>';
+}
+
+//Build the html for the camera selector
+function cameraDropdown() {
+  var selectedCameraHtml = null;
+  var dropDownHtml = '';
+  var eventsCountTotal = 0;
+
+  home.Cameras.forEach(camera => {
+    const nameHtml = camera.name + ' ' + eventHtml(camera.eventCount);
+    dropDownHtml += '<li><a class="dropdown-item cameraDropdownList" href="' + camera.uuid + '">' + nameHtml + '</a></li>\n';
+    cameraLookup[camera.uuid] = nameHtml;
+    //See if this camera is selected
+    if (camera.uuid == selectedCameraUUID) {
+      selectedCameraHtml = nameHtml;
+    }
+    eventsCountTotal += camera.eventCount;
+  });
+
+  //Prepend the All Cameras selector
+  const nameHtml = 'All Cameras ' + eventHtml(eventsCountTotal);
+  dropDownHtml = '<li><a class="dropdown-item cameraDropdownList" href="ALL_CAMERAS">' + nameHtml + '</a></li>\n' + dropDownHtml;
+  cameraLookup['ALL_CAMERAS'] = nameHtml;
+  if (selectedCameraHtml == null) {
+    selectedCameraHtml = nameHtml; //default to all cameras
+  }
+
+  var html = '<div class="dropdown me-2"> \
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="cameraDropdown">';
+  html += selectedCameraHtml;
+  html += '</button>\n<ul class="dropdown-menu">\n';
+  html += dropDownHtml;
+  html += '</ul>\n</div>\n';
+  return html;
+}
+
+//Build the html for the date selector
+function dateDropdown(eventsSubset) {
+
+  var selectedDateHtml = null;
+  var dropDownHtml = '';
+  var dates = []; //use array to preserve order
+
+  //Get unique dates with counts
+  var lastDateString = null;
+  eventsSubset.forEach(event => {
+    if (dateStringForUser(event.recordingStartTimestamp, userMe) != lastDateString) {
+      //Add this date
+      lastDateString = dateStringForUser(event.recordingStartTimestamp, userMe);
+      dates.push({ timestamp: event.recordingStartTimestamp, dateString: lastDateString, count: 0 });
+    }
+    //Update date event count
+    dates[dates.length - 1].count += 1;
+  });
+
+  dates.forEach(date => {
+    const nameHtml = date.dateString + ' ' + eventHtml(date.count);
+    dropDownHtml += '<li><a class="dropdown-item dateDropdownList" href="' + date.timestamp + '">' + nameHtml + '</a></li>\n';
+    dateLookup[date.timestamp] = nameHtml;
+    //See if this camera is selected
+    if ((selectedDateString != null) && (date.dateString == selectedDateString)) {
+      selectedDateHtml = nameHtml;
+    }
+  });
+
+  //Prepend the All Dates selector
+  const nameHtml = 'All Dates ' + eventHtml(eventsSubset.length);
+  dropDownHtml = '<li><a class="dropdown-item dateDropdownList" href="ALL_DATES">' + nameHtml + '</a></li>\n' + dropDownHtml;
+  dateLookup['ALL_DATES'] = nameHtml;
+  if (selectedDateHtml == null) {
+    selectedDateHtml = nameHtml;
+  }
+
+  var html = '<div class="dropdown me-2"> \
+    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="dateDropdown">';
+  html += selectedDateHtml;
+  html += '</button>\n<ul class="dropdown-menu">\n' + dropDownHtml + '</ul>\n</div>\n';
+  return html;
+}
+
+function initialisePage() {
+  //See if the camera uuid is set
+  const searchParams = new URLSearchParams(window.location.search);
+  selectedCameraUUID = searchParams.has('cameraUUID') ? searchParams.get('cameraUUID') : null;
+
+  //Get home info - for name and cameras and events
+  getHomesAndEvents();
+}
+
+function getHomesAndEvents(completionFunction) {
+  $.get('/homes', data => {
+    home = data[0];
+    userMe = findUserMe(home.Users);
+    $('#pageName').html('Events: ' + home.name);
+
+    //Now get the events
+    $.get('/events', data => {
+      events = data;
+   
+      //Show events
+      showEvents();
+
+      //Call completion function if set
+      if (typeof completionFunction === 'function') {
+        completionFunction();
+      }
+    });
+  });
+}
+
+function imageHtml(event) {
+  return '<img src="' + event.imageUrl + '" alt="' + event.uuid + '" class="img-fluid">';
+}
+
+function dateHeader(dateStr, num) {
+  return '<div class="bd-example m-0 border-0"> \
+            <nav class="navbar pt-3"><h4>' + dateStr + '</h4></nav> \
+            <div class="row row-cols-1 row-cols-md-2 g-4" id="eventsForDate_' + num + '"></div> \
+          </div>';
+}
+
+//Build the html for the event panel
+function eventPanel(event) {
+  var html = ' \
+  <div class="col"> \
+    <div class="card"> \
+      <div class="card-header h5">[EVENT_TIME]</div> \
+      [IMAGE] \
+      <div class="card-body"> \
+        <a href="view_[EVENT_UUID]" class="btn btn-outline-primary me-2 viewEvent">View video</a> \
+        <a href="delete_[EVENT_UUID]" class="btn btn-outline-danger deleteEvent">Delete event</a> \
+        <p class="card-text mt-2 text-end"> \
+          <span class="badge rounded-pill bg-danger [VIEWED]" id="badge_viewed_[EVENT_UUID]">Viewed</span> <span class="badge rounded-pill bg-success [NOT_VIEWED]" id="badge_not_viewed_[EVENT_UUID]">To view</span> \
+          <span class="badge rounded-pill bg-info">[MAX_PEOPLE_FOUND] found</span> <span class="badge rounded-pill bg-warning">[MAX_CONFIDENCE]% confidence</span> \
+        </p> \
+      </div> \
+    </div> \
+  </div> ';
+
+  // Replace the relevant strings with values for this camera
+  if (event.imageUrl == null) {
+    html = html.replace('[IMAGE]', blankImage(300, 'No image'));
+  }
+  else {
+    html = html.replace('[IMAGE]', imageHtml(event));
+  }
+  html = html.replace('[EVENT_TIME]', timeStringForUser(event.recordingStartTimestamp, userMe));
+  html = html.replaceAll('[EVENT_UUID]', event.uuid);
+  if (event.isViewed) {
+    html = html.replace('[VIEWED]', '');
+    html = html.replace('[NOT_VIEWED]', 'd-none');
+  }
+  else {
+    html = html.replace('[VIEWED]', 'd-none');
+    html = html.replace('[NOT_VIEWED]', '');
+  }
+  html = html.replace('[MAX_CONFIDENCE]', event.maxConfidence);
+  html = html.replace('[MAX_PEOPLE_FOUND]', event.maxPeopleFound + ' ' + ((event.maxPeopleFound == 1) ? 'person' : 'people'));
+  return html;
+}
+
+function showEvents() {
+  //Create the array of events - either all or just the ones for the selected camera UUID and date selected
+  var eventsSubset = [];
+  var eventsSubsetCamera = [];
+
+  events.forEach(event => {
+    if ((selectedCameraUUID == null) || (selectedCameraUUID == event.Camera.uuid)) {
+      //Note: create events for this camera (ignoring date selection) to get correct event list for date dropdown
+      eventsSubsetCamera.push(event);
+      if ((selectedDateString == null) || (selectedDateString == dateStringForUser(event.recordingStartTimestamp, userMe))) {
+        eventsSubset.push(event);
+      }
+    }
+  });
+
+  //Sort by date, most recent first
+  eventsSubset = eventsSubset.sort((a, b) => { return b.recordingStartTimestamp - a.recordingStartTimestamp });
+  eventsSubsetCamera = eventsSubsetCamera.sort((a, b) => { return b.recordingStartTimestamp - a.recordingStartTimestamp });
+
+  //Clear events header (contains spinner)
+  $('#eventsHeader').empty();
+  $('#eventsHeader').append('<nav class="navbar navbar-expand" id="dropdowns"></nav>');  
+  //Add dropdown camera and date selectors
+  $('#dropdowns').append(cameraDropdown());
+  $('#dropdowns').append(dateDropdown(eventsSubsetCamera));
+
+  //Display events
+  $('#eventsContent').empty();
+
+  var lastDateString = null;
+  var num = 0;
+  eventsSubset.forEach(event => {
+    if (dateStringForUser(event.recordingStartTimestamp, userMe) != lastDateString) {
+      //Add a date header
+      lastDateString = dateStringForUser(event.recordingStartTimestamp, userMe);
+      num += 1;
+      $('#eventsContent').append(dateHeader(lastDateString, num));
+    }
+    $('#eventsForDate_' + num).append(eventPanel(event));
+  });
+}
+
+function toggleEventViewed(eventUUID) {
+  $('#badge_viewed_' + eventUUID).removeClass('d-none');
+  $('#badge_not_viewed_' + eventUUID).addClass('d-none');
+}
+
+function showEventVideo(eventUUID) {
+  $.get('/events/' + eventUUID, event => {
+
+    //Title: the timestamp
+    $('#videoTitle').html(dateTimeStringForUser(event.recordingStartTimestamp, userMe));
+
+    $('#videoPreview').attr('poster', event.imageUrl);
+    $('#videoSource').attr('src', event.videoUrl);
+    $('#videoModal').modal('show');
+    $('#videoPreview')[0].load();
+
+    //Set the event as viewed on the server by calling PATCH on the /events/eventUUID endpoint
+    $.ajax({ url: '/events/' + eventUUID, type: 'PATCH', data: JSON.stringify({ isViewed: true }), contentType: 'application/json', success: () => {
+      //Toggle event viewed in the client
+      toggleEventViewed(eventUUID);
+    }});
+  })
+  .fail(err => {
+    console.log(err);
+  });
+}
+
+function deleteEvent(eventUUID) {
+  //Show spinner
+  $('#deletingModal').modal('show');
+  $.ajax({ url: '/events/' + eventUUID, type: 'DELETE', success: () => {
+    getHomesAndEvents(() => {
+      //Hide spinner
+      $('#deletingModal').modal('hide');
+    });
+  }});
+}
+
+$(() => {
+  //Try to refresh the token
+  getTokens(null, initialisePage);
+
+  //Camera selector change
+  $(document).on('click', '.cameraDropdownList', function(e) {
+    e.preventDefault();
+    selectedCameraUUID = ($(this).attr('href') == 'ALL_CAMERAS') ? null : $(this).attr('href');
+
+    //Update the dropdown name
+    $('#cameraDropdown').html(cameraLookup[$(this).attr('href')]);
+
+    //Refresh the event list showing the camera selected (or all)
+    showEvents();
+  });
+
+  //Date selector change
+  $(document).on('click', '.dateDropdownList', function(e) {
+    e.preventDefault();
+    selectedDateString = ($(this).attr('href') == 'ALL_DATES') ? null : dateStringForUser($(this).attr('href'), userMe);
+
+    //Update the dropdown name
+    $('#dateDropdown').html(dateLookup[$(this).attr('href')]);
+
+    //Refresh the event list showing the date selected (or all)
+    showEvents();
+  });
+
+  //View video click
+  $(document).on('click', '.viewEvent', function(e) {
+    e.preventDefault();
+    const eventUUID = $(this).attr('href').split('_')[1]; //href like "view_f9c99f29-fc87-4718-b7d9-03d46ca7cabf"
+    showEventVideo(eventUUID);
+  });
+
+  //Delete video click
+  var eventUUID = null;
+  $(document).on('click', '.deleteEvent', function(e) {
+    e.preventDefault();
+    eventUUID = $(this).attr('href').split('_')[1]; //href like "delete_f9c99f29-fc87-4718-b7d9-03d46ca7cabf"
+    //Show 'are you sure' modal
+    $('#deleteModal').modal('show');
+  });
+  //If Delete event clicked on the confirmation model, make the delete request.
+  $('#deleteEventButton').click(function(e) {
+    e.preventDefault();
+    deleteEvent(eventUUID);
+  })
+
+});
+
+</script>
+</body>
+</html>

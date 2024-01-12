@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GuardianBerry">
+    <meta name="author" content="Charles Allen">
+    <title>GuardianBerry Dashboard</title>
+
+    <link rel="canonical" href="dashboard.html">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="img/favicons/site.webmanifest">
+    <link rel="icon" href="img/favicons/favicon.ico">
+    <meta name="theme-color" content="#712cf9">
+
+    <!-- Custom styles -->
+    <link href="css/dashboard.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="dashboard.html">GuardianBerry</a>
+
+      <ul class="navbar-nav flex-row d-md-none">
+        <li class="nav-item text-nowrap">
+          <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <svg class="bi"><use xlink:href="img/sprite.svg#list"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div id="navbar" class="navbar w-100 collapse">
+        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+      </div>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+          <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="sidebarMenuLabel">GuardianBerry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="dashboard.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#dashboard"/></svg>
+                    Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="events.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#event"/></svg>
+                    Events
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="cameras.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#camera"/></svg>
+                    Cameras
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="users.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#people"/></svg>
+                    Users
+                  </a>
+                </li>
+              </ul>
+
+              <hr class="my-3">
+
+              <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="settings.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#gear-wide-connected"/></svg>
+                    Settings
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="#" id='logout'>
+                    <svg class="bi"><use xlink:href="img/sprite.svg#door-closed"/></svg>
+                    Sign out
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2" id='pageName'>Dashboard</h1>
+          </div>
+
+          <!-- Camera display -->
+          <div>
+            <div class="bd-example-snippet bd-code-snippet">
+              <div class="bd-example m-0 border-0">
+                <div class="row row-cols-1 row-cols-md-2 g-4" id='cameraPanels'>
+                  <!-- show a spinner while waiting for API to return -->
+                  <div class="spinner-border text-secondary m-5" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart of events -->
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom d-none" id="chartEventsHeader">
+            <h1 class="h2">Recent Events</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+              <div class="btn-group me-2">
+                <input type="radio" class="btn-check" name="buttonLast" id="buttonLast30" checked>
+                <label class="btn btn-outline-secondary" for="buttonLast30">Last 30 days</label>
+                <input type="radio" class="btn-check" name="buttonLast" id="buttonLast90">
+                <label class="btn btn-outline-secondary" for="buttonLast90">Last 90 days</label>
+              </div>
+            </div>
+          </div>
+          <canvas class="my-4 w-100 d-none" id="chartEvents" width="900" height="380"></canvas>
+
+        </main>
+      </div>
+
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-1 my-2 border-top">
+        <p class="col-md-4 mb-0 text-body-secondary small">© Charles Allen</p>
+
+        <a href="/dashboard.html" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <img class='img-rounded-corners' src="img/logo.png" alt="GuardianBerry logo" height="32">
+        </a>
+
+        <ul class="nav col-md-4 justify-content-end small">
+          <li class="nav-item"><a href="https://compsci.s3.eu-west-1.amazonaws.com/CM3070/api/index.html" class="nav-link px-2 text-body-secondary">API Specification</a></li>
+          <li class="nav-item"><a href="https://guardianberry.betteruptime.com" class="nav-link px-2 text-body-secondary">System Uptime</a></li>
+        </ul>
+      </footer>
+
+    </div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/chart.umd.js"></script>
+<script src="js/color-modes.js"></script>
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/guardianberry.js"></script>
+
+<script>
+
+//Global var for the active user
+var userMe;
+//Global var for chart data
+var chartData;
+//Global var for chart object
+var chartObject;
+
+//Global camera uuid -> name lookup
+var cameraLookup;
+
+//Static add new camera panel html
+function newCameraPanel() {
+  return ' \
+  <div class="col"> \
+    <div class="card"> \
+      <div class="card-header">Add New Camera</div> \
+      <div class="card-body"> \
+        <p class="card-text">Add a new camera to your GuardianBerry system.</p> \
+        <a href="cameras.html?action=add" class="btn btn-outline-primary">Add camera</a> \
+      </div> \
+    </div> \
+  </div>';
+}
+
+//Build the html for the camera panel using the relevant data from the camera object and this user
+function cameraPanel(camera) {
+  var html = ' \
+  <div class="col"> \
+    <div class="card"> \
+      <div class="card-header h5">[NAME]</div> \
+      [IMAGE] \
+      <div class="card-body"> \
+        <h5 class="card-title h6">[EVENT_COUNT]</h5> \
+        <a href="events.html?cameraUUID=[CAMERA_UUID]" class="btn btn-outline-primary [DISABLED]">View events</a> \
+        <p class="card-text mt-2 text-end"><small class="text-body-secondary">Last event [LAST_EVENT]. Camera added [CAMERA_ADDED_DATE].</small></p> \
+      </div> \
+    </div> \
+  </div> ';
+
+  //Replace the relevant strings with values for this camera
+  html = html.replace('[NAME]', camera.name);
+  if (camera.lastEventImageUrl == null) {
+    html = html.replace('[IMAGE]', blankImage(300, 'No events'));
+  }
+  else {
+    html = html.replace('[IMAGE]', imageHtml(camera));
+  }
+  const eventStr = camera.eventCount + ' event' + ((camera.eventCount == 1) ? '' : 's');
+  html = html.replace('[EVENT_COUNT]', eventStr);
+  html = html.replace('[CAMERA_UUID]', camera.uuid);
+  html = html.replace('[DISABLED]', camera.eventCount == 0 ? 'disabled' : '');
+  html = html.replace('[LAST_EVENT]', timeAgoForUser(camera.lastEventTimestamp, userMe));
+  html = html.replace('[CAMERA_ADDED_DATE]', dateStringForUser(camera.createdAt, userMe));
+  return html;
+}
+
+function updateEventsChart() {
+  //Create / update the events chart
+  const duration = $('#buttonLast30:checked').val() ? 30 : 90;
+
+  //Create chart data - count forward days from duration - 1 days ago
+  var labels = [];
+  var datasets = [];
+  //Create each camera as a dataset
+  for (var uuid in cameraLookup) {
+    datasets.push({ label: cameraLookup[uuid], data: [] });
+  }
+  for (days = -duration + 1; days <= 0; days++) {
+    const date = new Date(Date.now() + days * 24 * 3600 * 1000);
+    const dateStr = dateStringShortForUser(date / 1000, userMe);
+    labels.push(dateStr);
+    //See if this dateStr exists in chartData
+    if (dateStr in chartData) {
+      //Add the values for each camera
+      var i = 0;
+      for (var uuid in cameraLookup) {
+        if (uuid in chartData[dateStr]) {
+          //value for this camera
+          datasets[i]['data'].push(chartData[dateStr][uuid]);
+        }
+        else {
+          //no value for this camera
+          datasets[i]['data'].push(0);
+        }
+        i += 1;
+      }
+    }
+    else {
+      //No values for any camera for this dataset
+      datasets.forEach((data, i) => {
+        datasets[i]['data'].push(0);
+      });
+    }
+  };
+
+  //Create / update the chart
+  if (typeof chartObject === 'undefined') {
+    //Creating chart for 1st timwe
+    $('#chartEventsHeader').removeClass('d-none');
+    $('#chartEvents').removeClass('d-none');
+    
+    chartObject = new Chart(document.getElementById('chartEvents'), {
+      type: 'bar',
+      data: { datasets: datasets, labels: labels },
+      options: { scales: { x: { stacked: true }, y: { title: { text: 'Events', display: true }, stacked: true } } }
+    });
+  }
+  else {
+    chartObject.data.labels = labels;
+    chartObject.data.datasets = datasets;
+    chartObject.update();
+  }
+}
+
+function initialisePage() {
+  //Get stats for home by calling the /homes endpoint
+  $.get('/homes', data => {
+    //Only 1 home ever returned for normal users
+    const home = data[0];
+    userMe = findUserMe(home.Users);
+    $('#pageName').html('Dashboard: ' + home.name);
+
+    //Clear camera panels (contains spinner)
+    $('#cameraPanels').empty();
+
+    //Add camera panels and create camera lookup (used for chart later)
+    cameraLookup = {};
+    home.Cameras.forEach(camera => {
+      $('#cameraPanels').append(cameraPanel(camera));
+      cameraLookup[camera.uuid] = camera.name;
+    });
+
+    //Add 'Add New Camera' panel
+    $('#cameraPanels').append(newCameraPanel());
+
+    //Get events and then create event chart - needs to be sequential as relies on userMe being set
+    $.get('/events', data => {
+      //Create chart data in global chartData var as object with dates as string keys for camera event frequency for each date
+      chartData = {};
+      data.forEach(event => {
+        const date = dateStringShortForUser(event.recordingStartTimestamp, userMe);
+        //See if this date already in the object
+        if (!(date in chartData)) {
+          chartData[date] = {};
+        }
+        //See if this camera already in the object for this date
+        if (!(event.Camera.uuid in chartData[date])) {
+          chartData[date][event.Camera.uuid] = 0;
+        }
+        //Increment the number of events for this date and camera
+        chartData[date][event.Camera.uuid] += 1;
+      });
+      updateEventsChart();
+    })
+    .fail(err => {
+      console.log(err);
+    });
+  })
+  .fail(err => {
+    console.log(err);
+  });
+}
+
+$(() => {
+  const rt = 'eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.oAcP4ODte_RI3oA6nrSznMJ0UzcHWSf1Bhbf-CImMJ8eZnlw84AsLhv-c0d0M7UGvSkOvJ_AvqlaE76yihCbcvwA6vHwuanL__DAq7xlGqP0hv4kKQK9XVzG08w_bpTfbztxYsqX1P_qHS_nJPFNA-6Rvx6uKuT2DS_Te3bbQJiqnizn5qreFeRtiyWB9Zk1-nYSHIKE-noB-MoEHvOYphwhD_vjtTVRI6vctKPIy2AtJVl5jWCHcGlEIC-KDLaQ0kOYCWeoyjr7dHFRF3di_vv5lUYMCmaynzUIKIL301J1331HUIXVtUqmqDE_Um9TcNB5RoaZPlWqVngDFYzxdw.9h7ysXcDRz-xAd9u.dOcyWUdx-IWwedkuqHL-tPt061tKjvOFSm3o2EQrcstzeYMXRDv3yrDs0ENcz696cJkecCm04yLQQb1mhqpQTfzJgU4CdZC_n3zG12B2wh1qaolPaCcNxtSbDFwpYz64fo92rKkb3rbWHhQQ-PGxfx0aPpIGpdXgXhDyQ14yBPiD4E69ss4Bd1CV5JqlQra23iGMufuIugCUB_uITKaDIQDSLyeEfJJNDbdzmPLK8TUpxgnQzSmiAc4wSS9c02bdLW3Xb_hxQqA4JklTRsXzbavf5YqUYhrqniOSbiFW-ED4IcJaVG0B9o8ld8hnGwdTTu-JulUNAtIQa6tQPnkiXIpoFraZ3pmpcffdv2raIFwOvlFOC9ysGWGPFp-sSYjF182sjfzBn0CtiLWVvdXeww3xehtMbN0Rbtyj1IdjUVOWRWJctmxEniX89VcG7FDVU6c9fQmp3S9UlJqQcJQmvviJU1ZuXxIsrC6b_D9lSuiEFwxVnPiMNMUafaY_XhWjGzooMKkXWCPR1Ac1U-pn85hGGzB6odGmDpKZ1t_QO6SF9A_QtlvVi2UeJqiQZVlCJA0uGzUvNe-9IKFAgLi17PThVsJE0KJatDWXsP-d1xM-wAEEc4vqJaZHHlaRL-CM3Xhz2wDlRzlHkoCgQf1A7HN7G5vKpukJY4kJhI0xJzePMZsTqivzvtlCJevyEBacPqPQFCOBsuIqu-lHA_dQ6ZzTSxRgwcTXREaG_4b8t9NqbKTAv0EJCLb6BGVDRmESDMCCJEeKjZoS-jCDF8GAPdzCPSYD92q3OGNrV6FKCo_430PCOsXwVjiWqLo18TmeJHQSK7GwQXKDLe-r-MGUaF-YNHrXB0vFJ32unxujJwpHkqRqwBsnL0Tt67RZrzt0hi4s4fHhRh8yVP0qeOzimGf0wIreRTe8ioRWjut6oETBrlUk_pI50pG5z75T-jZfCZeuA6eyT87j2rLYbQSD-3R-3lTgXgREav186QmLLNT1ruU2aXd7ibIbQpjDux9Hk2Ce-1tIp6IneK09KD7Jji1C6AxxPIWGquyOi94rGv7fYrI9vg07Se_WOfv4koQIs2G9rvOSlOWV7gUPcFHIPPr6evJCq2VFju5IjRJgfiPEMQlEfhw2kVy1e08uSqae8ugOrxPzxN_uH6nsnHdWGcy0a_6ZI2iHo8egAHEguAd_Uk7nt94UBF__7fHxJ5m6iHFLB-ieAcn_7bumK6zGlj3aDKVvRqVYjZY.tajj0s3ObevSKdtfI9X4vA';
+  $.cookie('refreshToken', rt, { expires: COGNITO_REFRESH_TOKEN_EXPIRY, secure: true });
+
+  //If the webpage is called with code set like dashboard.html?code=<CODE> exchange for tokens
+  const searchParams = new URLSearchParams(window.location.search);
+  if (searchParams.has('code')) {
+    //Remove the code
+    window.history.replaceState(null, '', window.location.pathname);
+    //Get the tokens
+    getTokens(searchParams.get('code'), initialisePage);
+  }
+  else if ($.cookie('refreshToken') !== undefined) {
+    //Try to refresh the token
+    getTokens(null, initialisePage);
+  }
+  else {
+    //No code and no refresh token - logout
+    logout();
+  }
+
+  //Radio toggle change for chart duration
+  $(".btn-check").change(() => {
+    updateEventsChart();
+  });
+});
+
+</script>
+</body>
+</html>

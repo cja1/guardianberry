@@ -221,7 +221,7 @@ async function postUsers(userId, isAdmin, event) {
       throw err;      
     }
 
-    //Only create cognito entry if not test email, otherwuse use null uuid 00000000-0000-0000-0000-000000000000
+    //Only create cognito entry if not test email, otherwise use null uuid 00000000-0000-0000-0000-000000000000
     if (jsonBody['email'] == TEST_EMAIL) {
       return { User: { Username: '00000000-0000-0000-0000-000000000000' } };
     }

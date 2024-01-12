@@ -70,7 +70,7 @@ async function patchCamera(homeId, uuid, event) {
     //if rpiSerialNo set then get other cameras using this rpiSerialNo (if any)
     if ('rpiSerialNo' in jsonBody) {
       return models.Camera.findAll({
-        attributes: ['id'],
+        attributes: ['uuid'],
         where: { rpiSerialNo: jsonBody['rpiSerialNo'] }
       });
     }
@@ -79,8 +79,8 @@ async function patchCamera(homeId, uuid, event) {
     }
   })
   .then(cameras => {
-    if (cameras.length > 0) {
-      //rpiSerialNo already in use
+    if ((cameras.length > 0) && (cameras[0].uuid != uuid)) {
+      //rpiSerialNo already in use and not by this camera
       const err = new Error('rpiSerialNo "' + jsonBody['rpiSerialNo'] + '" already in use');        
       err.status = 422;
       throw err;

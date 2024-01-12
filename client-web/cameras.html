@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GuardianBerry">
+    <meta name="author" content="Charles Allen">
+    <title>GuardianBerry Cameras</title>
+
+    <link rel="canonical" href="dashboard.html">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="img/favicons/site.webmanifest">
+    <link rel="icon" href="img/favicons/favicon.ico">
+    <meta name="theme-color" content="#712cf9">
+
+    <!-- Custom styles -->
+    <link href="css/dashboard.css" rel="stylesheet">
+    <!-- International telephone styles -->
+    <link href="css/intlTelInput.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="dashboard.html">GuardianBerry</a>
+
+      <ul class="navbar-nav flex-row d-md-none">
+        <li class="nav-item text-nowrap">
+          <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <svg class="bi"><use xlink:href="img/sprite.svg#list"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div id="navbar" class="navbar w-100 collapse">
+        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+      </div>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+          <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="sidebarMenuLabel">GuardianBerry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" aria-current="page" href="dashboard.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#dashboard"/></svg>
+                    Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="events.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#event"/></svg>
+                    Events
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2 active" href="cameras.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#camera"/></svg>
+                    Cameras
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="users.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#people"/></svg>
+                    Users
+                  </a>
+                </li>
+              </ul>
+
+              <hr class="my-3">
+
+              <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="settings.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#gear-wide-connected"/></svg>
+                    Settings
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="#" id='logout'>
+                    <svg class="bi"><use xlink:href="img/sprite.svg#door-closed"/></svg>
+                    Sign out
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2" id='pageName'>Cameras</h1>
+          </div>
+
+          <!-- show a spinner while waiting for API to return -->
+          <div id='spinner'>
+            <div class="bd-example-snippet bd-code-snippet">
+              <div class="bd-example m-0 border-0">
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                  <div class="spinner-border text-secondary m-5" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive small" id='camerasTable' style='display: none;'>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Last Image</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Raspberry Pi Serial No.</th>
+                  <th scope="col">Events</th>
+                  <th scope="col">Last Event</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id='camerasTableBody'>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Edit Camera -->
+          <div class="card mt-4" id='editCameraCard' style="display: none;">
+            <div class="card-header"><h1 class="h5 mt-1">Edit Camera</h1></div>
+            <div class="card-body">
+              <form class="row g-3 needs-validation" novalidate id='editCameraForm'>
+                <div class="col-md-12">
+                  <label for="editName" class="form-label">Name</label>
+                  <input type="text" class="form-control cameraInputField" id="editName" required>
+                  <div class="invalid-feedback editValidation" id='editNameValidation'>Please enter a valid name</div>
+                </div>
+                <div class="col-md-12">
+                  <label for="editRPISerialNo" class="form-label">Raspberry Pi Serial No.</label>
+                  <input type="text" class="form-control cameraInputField" id="editRPISerialNo" required>
+                  <div class="invalid-feedback editValidation" id='editRPISerialNoValidation'>Please enter a valid Raspberry Pi Serial No.</div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-outline-primary editCameraButtons" id='buttonEdit'>Edit Camera</button>
+                  <button type="reset" class="btn btn-outline-secondary editCameraButtons" id='buttonEditCancel'>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Add New Camera -->
+          <div class="card mt-4" id='addCameraCard' style="display: none;">
+            <div class="card-header"><h1 class="h5 mt-1">Add New Camera</h1></div>
+            <div class="card-body">
+              <form class="row g-3 needs-validation" novalidate id='addCameraForm'>
+                <div class="col-md-12">
+                  <label for="addName" class="form-label">Name</label>
+                  <input type="text" class="form-control cameraInputField" id="addName" required>
+                  <div class="invalid-feedback addValidation" id='addNameValidation'>Please enter a valid name</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="addRPISerialNo" class="form-label">Raspberry Pi Serial No.</label>
+                  <input type="text" class="form-control cameraInputField" id="addRPISerialNo" required>
+                  <div class="invalid-feedback addValidation" id='addRPISerialNoValidation'>Please enter a valid Raspberry Pi Serial No.</div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-outline-primary addCameraButtons" id='buttonAdd'>Add Camera</button>
+                  <button type="reset" class="btn btn-outline-secondary addCameraButtons" id='buttonAddClear'>Clear</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-1 my-2 border-top">
+        <p class="col-md-4 mb-0 text-body-secondary small">© Charles Allen</p>
+
+        <a href="/dashboard.html" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <img class='img-rounded-corners' src="img/logo.png" alt="GuardianBerry logo" height="32">
+        </a>
+
+        <ul class="nav col-md-4 justify-content-end small">
+          <li class="nav-item"><a href="https://compsci.s3.eu-west-1.amazonaws.com/CM3070/api/index.html" class="nav-link px-2 text-body-secondary">API Specification</a></li>
+          <li class="nav-item"><a href="https://guardianberry.betteruptime.com" class="nav-link px-2 text-body-secondary">System Uptime</a></li>
+        </ul>
+      </footer>
+
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Camera</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to permanently delete this camera? This action can't be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id='deleteCameraButton'>Delete camera</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deleting spinner modal -->
+    <div class="modal fade" id="deletingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletingModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deletingModalLabel">Deleting Camera</h1>
+          </div>
+          <div class="modal-body">
+            <div class="spinner-border text-secondary m-5" role="status">
+              <span class="visually-hidden">Deleting...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed top-50 start-50 translate-middle-x" style="z-index: 11">
+      <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="toast-title me-auto" id='toastTitle'></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id='toastBody'></div>
+      </div>
+    </div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/color-modes.js"></script>
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/guardianberry.js"></script>
+
+<script>
+
+//Global var for the active user
+var userMe;
+
+//Global camera uuid -> camera lookup
+var cameraLookup = {};
+
+//Global var to hold working camera uuid for editing and deleting
+var cameraUUIDWorking;
+
+function createActions(camera) {
+  var html = '<button type="button" class="btn btn-outline-secondary btn-sm editCamera" id="button_edit_[CAMERA_UUID]">Edit</button> <button type="button" class="btn btn-outline-danger btn-sm deleteCamera" id="button_delete_[CAMERA_UUID]">Delete</button>';
+  return html.replaceAll('[CAMERA_UUID]', camera.uuid);
+}
+
+function cameraRow(camera) {
+  var html =  ' \
+  <tr> \
+    <td class="align-middle" width="120" height="100">[IMAGE]</td> \
+    <td class="align-middle">[NAME]</td> \
+    <td class="align-middle">[RPI_SERIAL_NUMBER]</td> \
+    <td class="align-middle"><span class="badge rounded-pill bg-secondary ms-2" style="width: 40px;">[EVENTS_COUNT]</span> <a href="events.html?cameraUUID=[CAMERA_UUID]" class="btn btn-outline-primary btn-sm [HIDE]">View</a></td> \
+    <td class="align-middle">[LAST_EVENT]</td> \
+    <td class="align-middle">[ACTIONS]</td> \
+  </tr>';
+
+  if (camera.lastEventImageUrl == null) {
+    html = html.replace('[IMAGE]', blankImage(80, 'None'));
+  }
+  else {
+    html = html.replace('[IMAGE]', imageHtml(camera));
+  }
+
+  html = html.replace('[NAME]', camera.name);
+  html = html.replace('[RPI_SERIAL_NUMBER]', camera.rpiSerialNo);
+  html = html.replace('[EVENTS_COUNT]', camera.eventCount);
+  html = html.replace('[CAMERA_UUID]', camera.uuid);
+  html = html.replace('[HIDE]', (camera.eventCount == 0) ? 'd-none' : '');
+  html = html.replace('[LAST_EVENT]', timeAgoForUser(camera.lastEventTimestamp, userMe));
+  html = html.replace('[ACTIONS]', createActions(camera));
+  return html;
+}
+
+function getHomes(completionFunction) {
+  //Get data for home by calling the /homes endpoint
+  $.get('/homes', data => {
+    //Only 1 home ever returned for normal users
+    const home = data[0];
+    userMe = findUserMe(home.Users);
+    $('#pageName').html('Cameras: ' + home.name);
+
+    //Hide spinner and show table
+    $('#spinner').hide();
+    $('#camerasTable').show();
+
+    //Add cameras data into table
+    $('#camerasTableBody').empty();
+    home.Cameras.forEach(camera => {
+      $('#camerasTableBody').append(cameraRow(camera));
+      //Create uuid -> camera lookup
+      cameraLookup[camera.uuid] = camera;
+    });
+
+    //Call completion function if set
+    if (typeof completionFunction === 'function') {
+      completionFunction();
+    }
+  });
+}
+
+function initialisePage() {
+  getHomes(() => {
+    //Show add camera card
+    $('#addCameraCard').show('fast');
+  });
+}
+
+function editCamera(cameraUUID) {
+  //Populate the form
+  const camera = cameraLookup[cameraUUID];
+  $('#editName').val(camera.name);
+  $('#editRPISerialNo').val(camera.rpiSerialNo); 
+
+  //Reset validation
+  $('.editValidation').hide();
+  $('#editCameraForm').removeClass('was-validated');
+
+  //Show the edit form
+  $('#editCameraCard').show('fast');
+}
+
+function deleteCamera(cameraUUID) {
+  //Show spinner
+  $('#deletingModal').modal('show');
+  $.ajax({ url: '/cameras/' + cameraUUID, type: 'DELETE', success: () => {
+    getHomes(() => {
+      //Hide spinner
+      $('#deletingModal').modal('hide');
+    });
+  }})
+  .fail(err => {
+    console.log(err);
+  });
+}
+
+function clearAddForm() {
+  $('#addName').val('');
+  $('#addRPISerialNo').val('');
+  $('#addCameraForm').removeClass('was-validated');
+  $('.addValidation').hide();
+  btnReset('buttonAdd');
+}
+
+$(() => {
+  //Try to refresh the token
+  getTokens(null, initialisePage);
+
+  //Edit camera click
+  $(document).on('click', '.editCamera', function(e) {
+    e.preventDefault();
+    cameraUUIDWorking = $(this).attr('id').split('_')[2];
+    editCamera(cameraUUIDWorking);
+  });
+
+  //Delete camera click
+  $(document).on('click', '.deleteCamera', function(e) {
+    e.preventDefault();
+    cameraUUIDWorking = $(this).attr('id').split('_')[2];
+    //Show 'are you sure' modal
+    $('#deleteModal').modal('show');
+  });
+
+  //If Delete camera clicked on the confirmation model, make the delete request.
+  $('#deleteCameraButton').click(function(e) {
+    e.preventDefault();
+    deleteCamera(cameraUUIDWorking);
+  });
+
+  //Edit camera click
+  $('#buttonEdit').click(e => {
+    e.preventDefault();
+
+    //Validate
+    var valid = true;
+
+    //Name
+    if ($('#editName').val().trim().length == 0) {
+      valid = false;
+      $('#editNameValidation').show();      
+    }
+    //RPI Serial No
+    if ($('#editRPISerialNo').val().trim().length == 0) {
+      valid = false;
+      $('#editRPISerialNoValidation').show();      
+    }
+    $('#editCameraForm').addClass('was-validated');
+
+    if (!valid) { return; }
+
+    //Disable the add / clear buttons and show spinner
+    $('.editCameraButtons').attr("disabled", "disabled");
+    btnLoading('buttonEdit', 'Updating...');
+
+    //Patch the camera data to the endpoint
+    const data = {
+      name: $('#editName').val().trim(),
+      rpiSerialNo: $('#editRPISerialNo').val().trim()
+    }
+    $.ajax({ url: '/cameras/' + cameraUUIDWorking, type: 'PATCH', data: JSON.stringify(data), contentType: 'application/json', success: (response) => {
+      //Reload cameras so edited camera appears
+      getHomes(() => {
+        $('.editCameraButtons').removeAttr("disabled", "disabled");
+        btnReset('buttonEdit');
+        $('#editCameraCard').hide('fast');
+        //Show message
+        showToast('Success', 'Camera ' + $('#editName').val().trim() + ' successfully edited', true);
+      });
+    }})
+    .fail(err => {
+      $('.editCameraButtons').removeAttr("disabled", "disabled");
+      btnReset('buttonEdit');
+      //Show message
+      showToast('Error', 'Failed to edit camera. ' + err.responseText, false);
+    });
+  });
+
+  //Add camera click
+  $('#buttonAdd').click(e => {
+    e.preventDefault();
+
+    //Validate
+    var valid = true;
+
+    //Name
+    if ($('#addName').val().trim().length == 0) {
+      valid = false;
+      $('#addNameValidation').show();      
+    }
+    if ($('#addRPISerialNo').val().trim().length == 0) {
+      valid = false;
+      $('#addRPISerialNoValidation').show();      
+    }
+    $('#addCameraForm').addClass('was-validated');
+
+    if (!valid) { return; }
+
+    //Disable the add / clear buttons and show spinner
+    $('.addCameraButtons').attr("disabled", "disabled");
+    btnLoading('buttonAdd', 'Creating...');
+
+    //Post the camera data to the endpoint
+    const data = {
+      name: $('#addName').val().trim(),
+      rpiSerialNo: $('#addRPISerialNo').val().trim()
+    }
+    $.ajax({ url: '/cameras', type: 'POST', data: JSON.stringify(data), contentType: 'application/json', success: (response) => {
+      //Reload cameras so new camera appears
+      getHomes(() => {
+        $('.addCameraButtons').removeAttr("disabled", "disabled");
+        clearAddForm();
+        //Show message
+        showToast('Success', 'Camera ' + $('#addName').val().trim() + ' successfully created', true);
+      });
+    }})
+    .fail(err => {
+      $('.addCameraButtons').removeAttr("disabled", "disabled");
+      btnReset('buttonAdd');
+      //Show message
+      showToast('Error', 'Failed to add camera. ' + err.responseText, false);
+    });
+  });
+
+  $('#buttonEditCancel').click(e => {
+    e.preventDefault();
+    $('#editCameraCard').hide('fast');
+  });
+  $('#buttonAddClear').click(e => {
+    e.preventDefault();
+    clearAddForm();
+  });
+
+  //Remove input validation on text input entry
+  $('.cameraInputField').on('input', function() {
+    $('#editCameraForm').removeClass('was-validated');
+    $('#addCameraForm').removeClass('was-validated');
+    $('.addValidation').hide();
+  });
+
+});
+
+</script>
+</body>
+</html>

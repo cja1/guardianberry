@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GuardianBerry">
+    <meta name="author" content="Charles Allen">
+    <title>GuardianBerry Settings</title>
+
+    <link rel="canonical" href="dashboard.html">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="img/favicons/site.webmanifest">
+    <link rel="icon" href="img/favicons/favicon.ico">
+    <meta name="theme-color" content="#712cf9">
+
+    <!-- Custom styles -->
+    <link href="css/dashboard.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="dashboard.html">GuardianBerry</a>
+
+      <ul class="navbar-nav flex-row d-md-none">
+        <li class="nav-item text-nowrap">
+          <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <svg class="bi"><use xlink:href="img/sprite.svg#list"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div id="navbar" class="navbar w-100 collapse">
+        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+      </div>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+          <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="sidebarMenuLabel">GuardianBerry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" aria-current="page" href="dashboard.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#dashboard"/></svg>
+                    Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="events.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#event"/></svg>
+                    Events
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="cameras.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#camera"/></svg>
+                    Cameras
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="users.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#people"/></svg>
+                    Users
+                  </a>
+                </li>
+              </ul>
+
+              <hr class="my-3">
+
+              <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2 active" href="settings.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#gear-wide-connected"/></svg>
+                    Settings
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="#" id='logout'>
+                    <svg class="bi"><use xlink:href="img/sprite.svg#door-closed"/></svg>
+                    Sign out
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2" id='pageName'>Settings</h1>
+          </div>
+
+          <!-- show a spinner while waiting for API to return -->
+          <div id='spinner'>
+            <div class="bd-example-snippet bd-code-snippet">
+              <div class="bd-example m-0 border-0">
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                  <div class="spinner-border text-secondary m-5" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Home -->
+          <div class="card mt-4" id='editHomeCard' style="display: none;">
+            <div class="card-header"><h1 class="h5 mt-1">Edit Home</h1></div>
+            <div class="card-body">
+              <form class="row g-3 needs-validation" novalidate id='editHomeForm'>
+                <div class="col-md-12">
+                  <label for="editName" class="form-label">Home name</label>
+                  <input type="text" class="form-control userInputField" id="editName" required>
+                  <div class="invalid-feedback editValidation" id='editNameValidation'>Please enter a valid name</div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-outline-primary" id='buttonEdit'>Edit Home</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Edit Theme settings -->
+          <div class="card mt-4" id='editThemeCard' style="display: none;">
+            <div class="card-header"><h1 class="h5 mt-1">Edit Display Theme</h1></div>
+            <div class="card-body">
+              <div class="col-md-12">
+
+                <input type="radio" class="btn-check themeRadios" name='themeRadioGroup' id="themeLight" value='light' data-bs-theme-value='light'>
+                <label class="btn btn-outline-primary" for="themeLight"><svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="img/sprite.svg#sun-fill"></use></svg> Light</label>
+
+                <input type="radio" class="btn-check themeRadios" name='themeRadioGroup' id="themeDark" value='dark' data-bs-theme-value='dark'>
+                <label class="btn btn-outline-primary" for="themeDark"><svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="img/sprite.svg#moon-stars-fill"></use></svg> Dark</label>
+
+                <input type="radio" class="btn-check themeRadios" name='themeRadioGroup' id="themeAuto" value='auto' data-bs-theme-value='auto'>
+                <label class="btn btn-outline-primary" for="themeAuto"><svg class="bi me-2 opacity-50 theme-icon" width="1em" height="1em"><use href="img/sprite.svg#circle-half"></use></svg> Auto</label>
+
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-1 my-2 border-top">
+        <p class="col-md-4 mb-0 text-body-secondary small">© Charles Allen</p>
+
+        <a href="/dashboard.html" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <img class='img-rounded-corners' src="img/logo.png" alt="GuardianBerry logo" height="32">
+        </a>
+
+        <ul class="nav col-md-4 justify-content-end small">
+          <li class="nav-item"><a href="https://compsci.s3.eu-west-1.amazonaws.com/CM3070/api/index.html" class="nav-link px-2 text-body-secondary">API Specification</a></li>
+          <li class="nav-item"><a href="https://guardianberry.betteruptime.com" class="nav-link px-2 text-body-secondary">System Uptime</a></li>
+        </ul>
+      </footer>
+
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed top-50 start-50 translate-middle-x" style="z-index: 11">
+      <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="toast-title me-auto" id='toastTitle'></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id='toastBody'></div>
+      </div>
+    </div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/color-modes.js"></script>
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/guardianberry.js"></script>
+
+<script>
+
+//Global var to hold home
+var home;
+
+function getHomes(completionFunction) {
+  //Set the theme toggle
+  switch(localStorage.getItem('theme')) {
+    case 'light':
+      $('#themeLight').prop('checked', true);
+      break;
+    case 'dark':
+      $('#themeDark').prop('checked', true);
+      break;
+    default:
+      $('#themeAuto').prop('checked', true);
+  }
+
+  //Get data for home by calling the /homes endpoint
+  $.get('/homes', data => {
+    //Only 1 home ever returned for normal users
+    home = data[0];
+    $('#pageName').html('Settings: ' + home.name);
+
+    //Hide spinner and show cards
+    $('#spinner').hide();
+    $('#editHomeCard').show('fast');
+    $('#editThemeCard').show('fast');
+
+    //Add data into home card
+    $('#editName').val(home.name);
+
+    //Call completion function if set
+    if (typeof completionFunction === 'function') {
+      completionFunction();
+    }
+  });
+}
+
+function initialisePage() {
+  getHomes();
+}
+
+$(() => {
+  //Try to refresh the token
+  getTokens(null, initialisePage);
+
+  //Edit home click
+  $('#buttonEdit').click(e => {
+    e.preventDefault();
+
+    //Validate
+    var valid = true;
+
+    //Name
+    if ($('#editName').val().trim().length == 0) {
+      valid = false;
+      $('#editNameValidation').show();      
+    }
+    $('#editHomeForm').addClass('was-validated');
+
+    if (!valid) { return; }
+
+    //Disable the add / clear buttons and show spinner
+    btnLoading('buttonEdit', 'Updating...');
+
+    //Patch the home data to the endpoint
+    const data = {
+      name: $('#editName').val().trim()
+    }
+    $.ajax({ url: '/homes/' + home.uuid, type: 'PATCH', data: JSON.stringify(data), contentType: 'application/json', success: (response) => {
+      //Reload home
+      getHomes(() => {
+        btnReset('buttonEdit');
+        //Show message
+        showToast('Success', 'Home ' + $('#editName').val().trim() + ' successfully edited', true);
+      });
+    }})
+    .fail(err => {
+      btnReset('buttonEdit');
+      //Show message
+      showToast('Error', 'Failed to edit home. ' + err.responseText, false);
+    });
+  });
+
+  //Remove input validation on text input entry
+  $('.userInputField').on('input', function() {
+    $('#editHomeForm').removeClass('was-validated');
+    $('.editValidation').hide();
+  });
+
+});
+
+</script>
+</body>
+</html>

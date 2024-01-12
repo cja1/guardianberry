@@ -198,6 +198,11 @@ async function getHomes(homeId, userId, isAdmin) {
         }
       })
     });
+
+    //Sort cameras by eventCount descending so cameras with most events appear first
+    out.forEach((home, i) => {
+      out[i].Cameras = home.Cameras.sort((a, b) => b.eventCount - a.eventCount);
+    });
     return out;
   });
 }

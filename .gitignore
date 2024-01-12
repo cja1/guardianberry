@@ -3,7 +3,6 @@ private/
 *.zip
 .DS_Store
 api-*
-client-web
 todo.txt
 server/guardianberry.zip
 server/publish*.*

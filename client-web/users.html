@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en" data-bs-theme="auto">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="GuardianBerry">
+    <meta name="author" content="Charles Allen">
+    <title>GuardianBerry Users</title>
+
+    <link rel="canonical" href="dashboard.html">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" href="img/favicons/apple-touch-icon.png" sizes="180x180">
+    <link rel="icon" href="img/favicons/favicon-32x32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="img/favicons/favicon-16x16.png" sizes="16x16" type="image/png">
+    <link rel="manifest" href="img/favicons/site.webmanifest">
+    <link rel="icon" href="img/favicons/favicon.ico">
+    <meta name="theme-color" content="#712cf9">
+
+    <!-- Custom styles -->
+    <link href="css/dashboard.css" rel="stylesheet">
+    <!-- International telephone styles -->
+    <link href="css/intlTelInput.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+      <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="dashboard.html">GuardianBerry</a>
+
+      <ul class="navbar-nav flex-row d-md-none">
+        <li class="nav-item text-nowrap">
+          <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <svg class="bi"><use xlink:href="img/sprite.svg#list"/></svg>
+          </button>
+        </li>
+      </ul>
+
+      <div id="navbar" class="navbar w-100 collapse">
+        <input class="form-control w-100 rounded-0 border-0" type="text" placeholder="Search" aria-label="Search">
+      </div>
+    </header>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="sidebar border border-right col-md-3 col-lg-2 p-0 bg-body-tertiary">
+          <div class="offcanvas-md offcanvas-end bg-body-tertiary" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="sidebarMenuLabel">GuardianBerry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#sidebarMenu" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-md-flex flex-column p-0 pt-lg-3 overflow-y-auto">
+              <ul class="nav flex-column">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" aria-current="page" href="dashboard.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#dashboard"/></svg>
+                    Dashboard
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="events.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#event"/></svg>
+                    Events
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="cameras.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#camera"/></svg>
+                    Cameras
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2 active" href="users.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#people"/></svg>
+                    Users
+                  </a>
+                </li>
+              </ul>
+
+              <hr class="my-3">
+
+              <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="settings.html">
+                    <svg class="bi"><use xlink:href="img/sprite.svg#gear-wide-connected"/></svg>
+                    Settings
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link d-flex align-items-center gap-2" href="#" id='logout'>
+                    <svg class="bi"><use xlink:href="img/sprite.svg#door-closed"/></svg>
+                    Sign out
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2" id='pageName'>Users</h1>
+          </div>
+
+          <!-- show a spinner while waiting for API to return -->
+          <div id='spinner'>
+            <div class="bd-example-snippet bd-code-snippet">
+              <div class="bd-example m-0 border-0">
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                  <div class="spinner-border text-secondary m-5" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive small" id='usersTable' style='display: none;'>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Mobile</th>
+                  <th scope="col">SMS Status</th>
+                  <th scope="col">SMS Received</th>
+                  <th scope="col">Last SMS Date</th>
+                  <th scope="col">Timezone</th>
+                  <th scope="col">Locale</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody id='usersTableBody'>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Edit User -->
+          <div class="card mt-4" id='editUserCard' style="display: none;">
+            <div class="card-header"><h1 class="h5 mt-1">Edit User</h1></div>
+            <div class="card-body">
+              <form class="row g-3 needs-validation" novalidate id='editUserForm'>
+                <div class="col-md-6">
+                  <label for="editName" class="form-label">Name</label>
+                  <input type="text" class="form-control userInputField" id="editName" required>
+                  <div class="invalid-feedback editValidation" id='editNameValidation'>Please enter a valid name</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="editMobile" class="form-label">Mobile</label>
+                  <input type="text" class="form-control userInputField" id="editMobile" required>
+                  <div class="invalid-feedback editValidation" id='editMobileValidation'>Please enter a valid mobile number</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="editTimezone" class="form-label">Timezone</label>
+                  <select id="editTimezone" class="form-select timezoneSelect"></select>
+                </div>
+                <div class="col-md-6">
+                  <label for="editLocale" class="form-label">Locale</label>
+                  <select id="editLocale" class="form-select localesSelect"></select>
+                </div>
+                <div class="col-md-6">
+                  <input class="form-check-input" type="checkbox" id="editEnableSMS">
+                  <label class="form-check-label" for="editEnableSMS">Enable SMS notifications</label>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-outline-primary editUserButtons" id='buttonEdit'>Edit User</button>
+                  <button type="reset" class="btn btn-outline-secondary editUserButtons" id='buttonEditCancel'>Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Add New User -->
+          <div class="card mt-4" id='addUserCard' style="display: none;">
+            <div class="card-header"><h1 class="h5 mt-1">Add New User</h1></div>
+            <div class="card-body">
+              <form class="row g-3 needs-validation" novalidate id='addUserForm'>
+                <div class="col-md-12">
+                  <label for="addName" class="form-label">Name</label>
+                  <input type="text" class="form-control userInputField" id="addName" required>
+                  <div class="invalid-feedback addValidation" id='addNameValidation'>Please enter a valid name</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="addEmail" class="form-label">Email</label>
+                  <input type="email" class="form-control userInputField" id="addEmail" required>
+                  <div class="invalid-feedback addValidation" id='addEmailValidation'>Please enter a valid email</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="addMobile" class="form-label">Mobile</label>
+                  <input type="text" class="form-control userInputField" id="addMobile" required>
+                  <div class="invalid-feedback addValidation" id='addMobileValidation'>Please enter a valid mobile number</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="addTimezone" class="form-label">Timezone</label>
+                  <select id="addTimezone" class="form-select timezoneSelect"></select>
+                </div>
+                <div class="col-md-6">
+                  <label for="addLocale" class="form-label">Locale</label>
+                  <select id="addLocale" class="form-select localesSelect"></select>
+                </div>
+                <div class="col-md-6">
+                  <input class="form-check-input" type="checkbox" id="addEnableSMS">
+                  <label class="form-check-label" for="addEnableSMS">Enable SMS notifications</label>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-outline-primary addUserButtons" id='buttonAdd'>Add User</button>
+                  <button type="reset" class="btn btn-outline-secondary addUserButtons" id='buttonAddClear'>Clear</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+      <footer class="d-flex flex-wrap justify-content-between align-items-center py-1 my-2 border-top">
+        <p class="col-md-4 mb-0 text-body-secondary small">© Charles Allen</p>
+
+        <a href="/dashboard.html" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+          <img class='img-rounded-corners' src="img/logo.png" alt="GuardianBerry logo" height="32">
+        </a>
+
+        <ul class="nav col-md-4 justify-content-end small">
+          <li class="nav-item"><a href="https://compsci.s3.eu-west-1.amazonaws.com/CM3070/api/index.html" class="nav-link px-2 text-body-secondary">API Specification</a></li>
+          <li class="nav-item"><a href="https://guardianberry.betteruptime.com" class="nav-link px-2 text-body-secondary">System Uptime</a></li>
+        </ul>
+      </footer>
+
+    </div>
+
+    <!-- Delete confirmation modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deleteModalLabel">Delete User</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to permanently delete this user? This action can't be undone.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id='deleteUserButton'>Delete user</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deleting spinner modal -->
+    <div class="modal fade" id="deletingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="deletingModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deletingModalLabel">Deleting User</h1>
+          </div>
+          <div class="modal-body">
+            <div class="spinner-border text-secondary m-5" role="status">
+              <span class="visually-hidden">Deleting...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- View notifications modal -->
+    <div class="modal fade" id="viewNotificationsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="viewNotificationsModalLabel" style="display: none;" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="viewNotificationsModalLabel">SMS Messages Received</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-sm table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Date Sent</th>
+                  <th scope="col">Message</th>
+                </tr>
+              </thead>
+              <tbody id='notificationsTableBody'>
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="position-fixed top-50 start-50 translate-middle-x" style="z-index: 11">
+      <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="toast-title me-auto" id='toastTitle'></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body" id='toastBody'></div>
+      </div>
+    </div>
+
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/color-modes.js"></script>
+<script src="js/jquery-3.7.1.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/guardianberry.js"></script>
+<!-- time zones and locales -->
+<script src="js/time-zones-names.js"></script>
+<script src="js/locales.js"></script>
+<!-- International telephone number input script, source: https://github.com/jackocnr/intl-tel-input -->
+<script src="js/intlTelInput.min.js"></script>
+<!-- validator library -->
+<script src="js/validator.min.js"></script>
+
+<script>
+
+//Global var for the active user
+var userMe;
+
+//Global user uuid -> user lookup
+var userLookup = {};
+
+//Global var to hold working user uuid for editing and deleting
+var userUUIDWorking;
+
+//Global intl tel number edit input
+var itiEdit;
+
+function createActions(user) {
+  var html;
+  if (user.isMe) {
+    html = '<button type="button" class="btn btn-outline-secondary btn-sm editUser" id="button_edit_[USER_UUID]">Edit</button>';    
+  }
+  else {
+    html = '<button type="button" class="btn btn-outline-danger btn-sm deleteUser" id="button_delete_[USER_UUID]">Delete</button>';
+  }
+  return html.replaceAll('[USER_UUID]', user.uuid);
+}
+
+function userRow(user) {
+  var html =  ' \
+  <tr> \
+    <td class="align-middle">[NAME]</td> \
+    <td class="align-middle">[MOBILE]</td> \
+    <td class="align-middle"><span class="badge rounded-pill bg-danger [INACTIVE]" id="badge_inactive_[USER_UUID]" style="width: 30px;">Off</span> <span class="badge rounded-pill bg-success [ACTIVE]" id="badge_active_[USER_UUID]" style="width: 30px;">On</span> [NOTIFICATIONS_TOGGLE] \
+    <td class="align-middle"><span class="badge rounded-pill bg-secondary ms-2" style="width: 40px;">[NOTIFICATIONS_COUNT]</span> [VIEW_NOTIFICATIONS_BUTTON]</td> \
+    <td class="align-middle">[LAST_NOTIFICATION]</td> \
+    <td class="align-middle">[TIMEZONE]</td> \
+    <td class="align-middle">[LOCALE]</td> \
+    <td class="align-middle">[ACTIONS]</td> \
+  </tr>';
+
+  html = html.replace('[NAME]', user.name);
+  html = html.replace('[MOBILE]', user.mobile);
+  if (user.sendNotifications) {
+    html = html.replace('[ACTIVE]', '');
+    html = html.replace('[INACTIVE]', 'd-none');
+  }
+  else {
+    html = html.replace('[ACTIVE]', 'd-none');
+    html = html.replace('[INACTIVE]', '');
+  }
+  html = html.replace('[NOTIFICATIONS_TOGGLE]', user.isMe ? '<button type="button" class="btn btn-outline-primary btn-sm toggleNotifications" id="button_sendNotifications_[USER_UUID]">Toggle</button></td>' : '');
+  html = html.replace('[NOTIFICATIONS_COUNT]', user.notificationCount);
+  html = html.replace('[VIEW_NOTIFICATIONS_BUTTON]', user.notificationCount > 0 ? '<button type="button" class="btn btn-outline-primary btn-sm viewNotifications" id="button_viewNotifications_[USER_UUID]">View</button>' : '');
+  html = html.replace('[LAST_NOTIFICATION]', timeAgoForUser(user.lastNotificationTimestamp, userMe));
+  html = html.replace('[TIMEZONE]', user.timezone);
+  html = html.replace('[LOCALE]', locales[user.locale.replace('-', '_')]); //Global locales is indexed on locale with underscoe separator
+  html = html.replace('[ACTIONS]', createActions(user));
+  html = html.replaceAll('[USER_UUID]', user.uuid);
+  return html;
+}
+
+function getHomes(completionFunction) {
+  //Get data for home by calling the /homes endpoint
+  $.get('/homes', data => {
+    //Only 1 home ever returned for normal users
+    const home = data[0];
+    userMe = findUserMe(home.Users);
+    $('#pageName').html('Users: ' + home.name);
+
+    //Hide spinner and show table
+    $('#spinner').hide();
+    $('#usersTable').show();
+
+    //Add users data into table
+    $('#usersTableBody').empty();
+    home.Users.forEach(user => {
+      $('#usersTableBody').append(userRow(user));
+      //Create uuid -> user lookup
+      userLookup[user.uuid] = user;
+    });
+
+    //Call completion function if set
+    if (typeof completionFunction === 'function') {
+      completionFunction();
+    }
+  });
+}
+
+function initialisePage() {
+  getHomes(() => {
+    //Show add user card
+    $('#addUserCard').show('fast');
+  });
+}
+
+function toggleNotifications(elementId, userUUID) {
+  const user = userLookup[userUUID];
+
+  btnLoading(elementId, 'Toggling...');
+  $.ajax({ url: '/users/' + userUUID, type: 'PATCH', data: JSON.stringify({ sendNotifications: !user.sendNotifications }), contentType: 'application/json', success: () => {
+    btnReset(elementId);
+
+    //Toggle status in the client
+    userLookup[userUUID].sendNotifications = !user.sendNotifications;
+    if (userLookup[userUUID].sendNotifications) {
+      $('#badge_active_' + userUUID).removeClass('d-none');
+      $('#badge_inactive_' + userUUID).addClass('d-none');
+    }
+    else {
+      $('#badge_inactive_' + userUUID).removeClass('d-none');
+      $('#badge_active_' + userUUID).addClass('d-none');
+    }
+  }});
+}
+
+function notificationRow(notification) {
+  return '<tr><td><small>' + dateTimeStringForUser(notification.timestamp, userMe) + '</small></td><td><small>' + notification.message + '</small></td></tr>';
+}
+
+function viewNotifications(elementId, userUUID) {
+  btnLoading(elementId, 'Downloading...');
+
+  $.get('/users/' + userUUID, user => {
+    $('#notificationsTableBody').empty();
+    $('#viewNotificationsModal').modal('show');
+    btnReset(elementId);
+
+    const notifications = user.Notifications.sort((a, b) => { return b.timestamp - a.timestamp });
+    notifications.forEach(notification => {
+      $('#notificationsTableBody').append(notificationRow(notification));
+    });
+  })
+  .fail(err => {
+    console.log(err);
+  });
+}
+
+function editUser(userUUID) {
+  //Populate the form
+  const user = userLookup[userUUID];
+  $('#editName').val(user.name);
+  itiEdit.setNumber(user.mobile);
+  $('#editTimezone').val(user.timezone); 
+  $('#editLocale').val(user.locale);
+  $('#editEnableSMS').prop('checked', user.sendNotifications);
+
+  //Reset validation
+  $('.editValidation').hide();
+  $('#editUserForm').removeClass('was-validated');
+
+  //Show the edit form
+  $('#editUserCard').show('fast');
+}
+
+function deleteUser(userUUID) {
+  //Show spinner
+  $('#deletingModal').modal('show');
+  $.ajax({ url: '/users/' + userUUID, type: 'DELETE', success: () => {
+    getHomes(() => {
+      //Hide spinner
+      $('#deletingModal').modal('hide');
+    });
+  }})
+  .fail(err => {
+    console.log(err);
+  });
+}
+
+function clearAddForm() {
+  $('#addName').val('');
+  $('#addEmail').val('');
+  $('#addMobile').val('');
+  $('#addUserForm').removeClass('was-validated');
+  $('.addValidation').hide();
+  btnReset('buttonAdd');
+}
+
+$(() => {
+  //Try to refresh the token
+  getTokens(null, initialisePage);
+
+  //Toggle notifications click
+  $(document).on('click', '.toggleNotifications', function(e) {
+    e.preventDefault();
+    const userUUID = $(this).attr('id').split('_')[2];
+    toggleNotifications($(this).attr('id'), userUUID);
+  });
+
+  //View notifications click
+  $(document).on('click', '.viewNotifications', function(e) {
+    e.preventDefault();
+    const userUUID = $(this).attr('id').split('_')[2];
+    viewNotifications($(this).attr('id'), userUUID);
+  });
+
+  //Edit user click
+  $(document).on('click', '.editUser', function(e) {
+    e.preventDefault();
+    userUUIDWorking = $(this).attr('id').split('_')[2];
+    editUser(userUUIDWorking);
+  });
+
+  //Delete user click
+  $(document).on('click', '.deleteUser', function(e) {
+    e.preventDefault();
+    userUUIDWorking = $(this).attr('id').split('_')[2];
+    //Show 'are you sure' modal
+    $('#deleteModal').modal('show');
+  });
+
+  //If Delete user clicked on the confirmation model, make the delete request.
+  $('#deleteUserButton').click(function(e) {
+    e.preventDefault();
+    deleteUser(userUUIDWorking);
+  });
+
+  //Add / edit form setup
+  //Mobile phone numbers
+  itiEdit = window.intlTelInput(document.querySelector("#editMobile"), {
+    utilsScript: "js/intlTelInputUtils.js",
+    preferredCountries: ['gb', 'sg']
+  });
+  const itiAdd = window.intlTelInput(document.querySelector("#addMobile"), {
+    utilsScript: "js/intlTelInputUtils.js",
+    preferredCountries: ['gb', 'sg']
+  });
+
+  //Time zone names - simple array
+  //Default to browser timezone
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  timeZoneNames.forEach(name => {
+    const selected = (name == timezone) ? 'selected' : '';
+    $('.timezoneSelect').append('<option value="' + name + '" ' + selected + '>' + name + '</option>');
+  });
+  //Locales with locale code and locale name
+  //Default to browser locale
+  const locale = (new Intl.NumberFormat()).resolvedOptions().locale;
+  localesArray.forEach(obj => {
+    const selected = (obj.code == locale) ? 'selected' : '';
+    $('.localesSelect').append('<option value="' + obj.code + '" ' + selected + '>' + obj.name + '</option>');
+  });
+
+  //Edit user click
+  $('#buttonEdit').click(e => {
+    e.preventDefault();
+
+    //Validate
+    var valid = true;
+
+    //Name
+    if ($('#editName').val().trim().length == 0) {
+      valid = false;
+      $('#editNameValidation').show();      
+    }
+    //Mobile
+    if (!itiEdit.isValidNumber() || (itiEdit.getNumberType() !== intlTelInputUtils.numberType.MOBILE)) {
+      valid = false;
+      $('#editMobileValidation').show();
+    }
+    $('#editUserForm').addClass('was-validated');
+
+    if (!valid) { return; }
+
+    //Disable the add / clear buttons and show spinner
+    $('.editUserButtons').attr("disabled", "disabled");
+    btnLoading('buttonEdit', 'Updating...');
+
+    //Patch the user data to the endpoint
+    const data = {
+      name: $('#editName').val().trim(),
+      mobile: itiEdit.getNumber(),
+      timezone: $('#editTimezone').val(), 
+      locale: $('#editLocale').val(),
+      sendNotifications: $('#editEnableSMS').prop('checked')
+    }
+    $.ajax({ url: '/users/' + userUUIDWorking, type: 'PATCH', data: JSON.stringify(data), contentType: 'application/json', success: (response) => {
+      //Reload users so edited user appears
+      getHomes(() => {
+        $('.editUserButtons').removeAttr("disabled", "disabled");
+        btnReset('buttonEdit');
+        $('#editUserCard').hide('fast');
+        //Show message
+        showToast('Success', 'User ' + $('#editName').val().trim() + ' successfully edited', true);
+      });
+    }})
+    .fail(err => {
+      $('.editUserButtons').removeAttr("disabled", "disabled");
+      btnReset('buttonEdit');
+      //Show message
+      showToast('Error', 'Failed to edit user. ' + err.responseText, false);
+    });
+  });
+
+  //Add user click
+  $('#buttonAdd').click(e => {
+    e.preventDefault();
+
+    //Validate
+    var valid = true;
+
+    //Name
+    if ($('#addName').val().trim().length == 0) {
+      valid = false;
+      $('#addNameValidation').show();      
+    }
+    //Email
+    if (!validator.isEmail($('#addEmail').val())) {
+      valid = false;
+      $('#addEmailValidation').show();
+    }
+    //Mobile
+    if (!itiAdd.isValidNumber() || (itiAdd.getNumberType() !== intlTelInputUtils.numberType.MOBILE)) {
+      valid = false;
+      $('#addMobileValidation').show();
+    }
+    $('#addUserForm').addClass('was-validated');
+
+    if (!valid) { return; }
+
+    //Disable the add / clear buttons and show spinner
+    $('.addUserButtons').attr("disabled", "disabled");
+    btnLoading('buttonAdd', 'Creating...');
+
+    //Post the user data to the endpoint
+    const data = {
+      name: $('#addName').val().trim(),
+      email: $('#addEmail').val(),
+      mobile: itiAdd.getNumber(),
+      timezone: $('#addTimezone').val(), 
+      locale: $('#addLocale').val(),
+      sendNotifications: $('#addEnableSMS').prop('checked')
+    }
+    $.ajax({ url: '/users', type: 'POST', data: JSON.stringify(data), contentType: 'application/json', success: (response) => {
+      //Reload users so new user appears
+      getHomes(() => {
+        $('.addUserButtons').removeAttr("disabled", "disabled");
+        clearAddForm();
+        //Show message
+        showToast('Success', 'User ' + $('#addName').val().trim() + ' successfully created', true);
+      });
+    }})
+    .fail(err => {
+      $('.addUserButtons').removeAttr("disabled", "disabled");
+      btnReset('buttonAdd');
+      //Show message
+      showToast('Error', 'Failed to add user. ' + err.responseText, false);
+    });
+  });
+
+  $('#buttonEditCancel').click(e => {
+    e.preventDefault();
+    $('#editUserCard').hide('fast');
+  });
+  $('#buttonAddClear').click(e => {
+    e.preventDefault();
+    clearAddForm();
+  });
+
+  //Remove input validation on text input entry
+  $('.userInputField').on('input', function() {
+    $('#editUserForm').removeClass('was-validated');
+    $('#addUserForm').removeClass('was-validated');
+    $('.addValidation').hide();
+  });
+
+});
+
+</script>
+</body>
+</html>
