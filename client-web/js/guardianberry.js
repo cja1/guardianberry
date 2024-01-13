@@ -100,7 +100,7 @@ function timeStringForUser(timestamp, user) {
 //Return a string like '10 secs ago or '10 hours ago'
 function timeAgoForUser(timestamp, user) {
   if (timestamp == null) {
-    return 'never';
+    return 'Never';
   }
 
   const formatter = new Intl.RelativeTimeFormat('en');  //Force to English for now

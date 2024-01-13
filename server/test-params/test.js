@@ -1,5 +1,5 @@
 module.exports = {
-  "httpMethod": "DELETE",
+  "httpMethod": "POST",
   "requestContext": {
     "authorizer": {
       "claims": {
@@ -7,7 +7,5 @@ module.exports = {
       }
     }
   },
-  "pathParameters": {
-    "proxy": "99d52cc8-6ea8-4aa7-b714-271405074b3d",
-  }
+  "body": '{"name": "TEST CAMERA 80","rpiSerialNo": "TEST_SERIAL_NO80","homeUUID":"be859e1f-7e28-4aa5-b19f-27d3cf0558af"}'
 };

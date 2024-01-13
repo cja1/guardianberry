@@ -168,20 +168,6 @@ var chartObject;
 //Global camera uuid -> name lookup
 var cameraLookup;
 
-//Static add new camera panel html
-function newCameraPanel() {
-  return ' \
-  <div class="col"> \
-    <div class="card"> \
-      <div class="card-header">Add New Camera</div> \
-      <div class="card-body"> \
-        <p class="card-text">Add a new camera to your GuardianBerry system.</p> \
-        <a href="cameras.html?action=add" class="btn btn-outline-primary">Add camera</a> \
-      </div> \
-    </div> \
-  </div>';
-}
-
 //Build the html for the camera panel using the relevant data from the camera object and this user
 function cameraPanel(camera) {
   var html = ' \
@@ -289,9 +275,6 @@ function initialisePage() {
       $('#cameraPanels').append(cameraPanel(camera));
       cameraLookup[camera.uuid] = camera.name;
     });
-
-    //Add 'Add New Camera' panel
-    $('#cameraPanels').append(newCameraPanel());
 
     //Get events and then create event chart - needs to be sequential as relies on userMe being set
     $.get('/events', data => {
