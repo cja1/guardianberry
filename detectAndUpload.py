@@ -1,5 +1,5 @@
 # YOLOv5 🚀 by Ultralytics, AGPL-3.0 license
-# Detect and upload - modified script for UOL Compsci Project
+# Detect and upload - script mofified and extended by Charles Allen for UOL Compsci Project CM3070
 
 import os
 import sys

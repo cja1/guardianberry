@@ -1,3 +1,4 @@
+#Written by Charles Allen for UOL Compsci CM3070 Final project
 from pycocotools.coco import COCO
 import urllib.request
 import os
@@ -31,22 +32,22 @@ def main():
     print(f"Number of images with cars: {len(car_ids)}. Of which, with people: {len(car_person_ids)}, without people: {len(car_no_person_ids)}")
     print(f"Number of images with couches: {len(couch_ids)}. Of which, with people: {len(couch_person_ids)}, without people: {len(couch_no_person_ids)}")
 
-    # Now get IMAGES_DESIRED images with each type. Put data in an array of objects for simplicity
-    desiredTypes = [
+    # Now get IMAGES_DESIRED images with each type. Put data in an array of objects for simplicity.
+    desired_types = [
         { "dir": "car_person", "ids": car_person_ids },
         { "dir": "car_no_person", "ids": car_no_person_ids },
         { "dir": "couch_person", "ids": couch_person_ids },
         { "dir": "couch_no_person", "ids": couch_no_person_ids }
     ]
-    for desiredType in desiredTypes:
-        ids = desiredType["ids"][0:IMAGES_DESIRED]  #Just first IMAGES_DESIRED images
+    for desired_type in desired_types:
+        ids = desired_type["ids"][0:IMAGES_DESIRED]  #Just first IMAGES_DESIRED images
         imgs_info = coco_annotation.loadImgs(ids)
         for img_info in imgs_info:
             img_file_name = img_info["file_name"]
             img_url = img_info["coco_url"]
 
             #Save in directory in local images dir
-            local_file_path = "images/" + desiredType["dir"] + "/" + img_file_name
+            local_file_path = "images/" + desired_type["dir"] + "/" + img_file_name
             
             #Skip if file exists
             if os.path.isfile(local_file_path):
