@@ -11,106 +11,123 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `Homes`;
 CREATE TABLE `Homes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) COLLATE utf8_bin DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb3_bin DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
 
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `deletedAt` datetime DEFAULT NULL,
+
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 -- ----------------------------
 -- Table structure for Cameras
 -- ----------------------------
 DROP TABLE IF EXISTS `Cameras`;
 CREATE TABLE `Cameras` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) COLLATE utf8_bin DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `rpiSerialNo` varchar(20) COLLATE utf8_bin DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb3_bin DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+  `rpiSerialNo` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
 
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `deletedAt` datetime DEFAULT NULL,
-  
-  `HomeId` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+  `HomeId` int DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  KEY `HomeId` (`HomeId`) USING BTREE,
+  KEY `uuid` (`uuid`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 -- ----------------------------
 -- Table structure for Events
 -- ----------------------------
 DROP TABLE IF EXISTS `Events`;
 CREATE TABLE `Events` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) COLLATE utf8_bin DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb3_bin DEFAULT NULL,
+  `isViewed` tinyint(1) DEFAULT '0',
 
-  -- Image file metadata
-  `imageFilename` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  --  Image file metadata
+  `imageFilename` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
   `recordingStartTime` datetime DEFAULT NULL,
-  `confidence` int(11) DEFAULT NULL,
-  `imageWidth` int(11) DEFAULT NULL,
-  `imageHeight` int(11) DEFAULT NULL,
+  `confidence` int DEFAULT NULL,
+  `imageWidth` int DEFAULT NULL,
+  `imageHeight` int DEFAULT NULL,
 
-  -- Video file metadata
-  `videoFilename` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `model` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `frameRate` int(11) DEFAULT NULL,
+  --  Video file metadata
+  `videoFilename` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+  `model` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+  `frameRate` int DEFAULT NULL,
   `confidenceThreshold` float DEFAULT NULL,
-  `duration` int(11) DEFAULT NULL,
-  `maxPeopleFound` int(11) DEFAULT NULL,
-  `maxConfidence` int(11) DEFAULT NULL,
-  `inferenceTime` int(11) DEFAULT NULL,
-  `videoWidth` int(11) DEFAULT NULL,
-  `videoHeight` int(11) DEFAULT NULL,
+  `duration` int DEFAULT NULL,
+  `maxPeopleFound` int DEFAULT NULL,
+  `maxConfidence` int DEFAULT NULL,
+  `inferenceTime` int DEFAULT NULL,
+  `videoWidth` int DEFAULT NULL,
+  `videoHeight` int DEFAULT NULL,
 
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `deletedAt` datetime DEFAULT NULL,
 
-  `CameraId` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `CameraId` int DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  KEY `CameraId` (`CameraId`) USING BTREE,
+  KEY `uuid` (`uuid`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 -- ----------------------------
 -- Table structure for Users
 -- ----------------------------
 DROP TABLE IF EXISTS `Users`;
 CREATE TABLE `Users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) COLLATE utf8_bin DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
-  `mobile` varchar(20) COLLATE utf8_bin DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb3_bin DEFAULT NULL,
+  `cognitoId` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
+  `isAdmin` tinyint(1) DEFAULT '0',
+  `mobile` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
   `sendNotifications` tinyint(1) DEFAULT '0',
-  `locale` varchar(20) COLLATE utf8_bin DEFAULT NULL,
-  `timezone` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `locale` varchar(20) COLLATE utf8mb3_bin DEFAULT NULL,
+  `timezone` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
 
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `deletedAt` datetime DEFAULT NULL,
 
-  `HomeId` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `HomeId` int DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  KEY `HomeId` (`HomeId`) USING BTREE,
+  KEY `uuid` (`uuid`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 
 -- ----------------------------
 -- Table structure for Notifications
 -- ----------------------------
 DROP TABLE IF EXISTS `Notifications`;
 CREATE TABLE `Notifications` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uuid` char(36) COLLATE utf8_bin DEFAULT NULL,
-  `message` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` char(36) COLLATE utf8mb3_bin DEFAULT NULL,
+  `message` varchar(255) COLLATE utf8mb3_bin DEFAULT NULL,
 
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `deletedAt` datetime DEFAULT NULL,
 
-  `UserId` int(11) DEFAULT NULL,
-  `EventId` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+  `UserId` int DEFAULT NULL,
+  `EventId` int DEFAULT NULL,
+
+  PRIMARY KEY (`id`),
+  KEY `UserId` (`UserId`) USING BTREE,
+  KEY `EventId` (`EventId`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
 
 SET FOREIGN_KEY_CHECKS = 1;
