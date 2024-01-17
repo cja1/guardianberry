@@ -355,7 +355,7 @@ function eventPanel(event) {
 
   // Replace the relevant strings with values for this camera
   if (event.imageUrl == null) {
-    html = html.replace('[IMAGE]', blankImage(300, 'No image'));
+    html = html.replace('[IMAGE]', blankImage(300, 'No preview available'));
   }
   else {
     html = html.replace('[IMAGE]', imageHtml(event));

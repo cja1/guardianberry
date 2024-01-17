@@ -122,10 +122,10 @@
             <h1 class="h2">Recent Events</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group me-2">
-                <input type="radio" class="btn-check" name="buttonLast" id="buttonLast30" checked>
+                <input type="radio" class="btn-check" name="buttonLast" id="buttonLast7" checked>
+                <label class="btn btn-outline-secondary" for="buttonLast7">Last 7 days</label>
+                <input type="radio" class="btn-check" name="buttonLast" id="buttonLast30">
                 <label class="btn btn-outline-secondary" for="buttonLast30">Last 30 days</label>
-                <input type="radio" class="btn-check" name="buttonLast" id="buttonLast90">
-                <label class="btn btn-outline-secondary" for="buttonLast90">Last 90 days</label>
               </div>
             </div>
           </div>
@@ -202,7 +202,7 @@ function cameraPanel(camera) {
 
 function updateEventsChart() {
   //Create / update the events chart
-  const duration = $('#buttonLast30:checked').val() ? 30 : 90;
+  const duration = $('#buttonLast7:checked').val() ? 7 : 30;
 
   //Create chart data - count forward days from duration - 1 days ago
   var labels = [];

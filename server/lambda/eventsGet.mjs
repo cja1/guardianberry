@@ -162,6 +162,11 @@ async function getEvents(homeId) {
 
   var out = [];
 
+  const MAX_IMAGES = 100; //Only send this many presigned images - otherwise API is too slow.
+
+  const start = +new Date();
+  var intermediate = +new Date();
+
   //Get all events for this Home (associated via Camera)
   return await models.Event.findAll({
     attributes: ['uuid', 'isViewed', 'imageFilename', 'recordingStartTime', 'duration', 'maxPeopleFound', 'maxConfidence'],
@@ -171,6 +176,9 @@ async function getEvents(homeId) {
     order: [[ 'id', 'DESC']]
   })
   .then(events => {
+    console.log('findAll', (+new Date()) - intermediate);
+    intermediate = +new Date();
+
     //Create output data with timestamps and array of image filenamers for creating pre-signed urls
     var imageFilenames = [];
 
@@ -178,19 +186,32 @@ async function getEvents(homeId) {
       //Convert to POJO
       event = event.get({ plain: true });
       event['recordingStartTimestamp'] = event.recordingStartTime.getTime() / 1000;
-      imageFilenames.push(event.imageFilename);
       delete event.recordingStartTime;
+      if (imageFilenames.length < MAX_IMAGES) {
+        imageFilenames.push(event.imageFilename);
+      }
       out.push(event)
     });
     //Generate pre-signed URLS
     return generatePresignedImageUrls(imageFilenames)
   })
   .then(presignedUrls => {
-    //Now replace imageFilenames with the presigned URL
+    console.log('presignedUrls', (+new Date()) - intermediate);
+    intermediate = +new Date();
+
+    //Now replace imageFilenames with the presigned URL - if have is available
     out.forEach((event, i) => {
-      out[i]['imageUrl'] = presignedUrls[event.imageFilename];
+      if (event.imageFilename in presignedUrls) {
+        out[i]['imageUrl'] = presignedUrls[event.imageFilename];
+      }
+      else {
+        out[i]['imageUrl'] = null;        
+      }
       delete out[i].imageFilename;
     });
+
+    console.log('replacing', (+new Date()) - intermediate);
+    console.log('total', (+new Date()) - start);
 
     return out;
   });

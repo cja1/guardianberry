@@ -30,11 +30,11 @@ imgsz = [640] * 2     # inference size (height, width)
 conf_thres = 0.255    # confidence threshold
 iou_thres = 0.45      # NMS IOU threshold
 stream_url = 'tcp://127.0.0.1:8888' #Run lib camera on the localhost port 8888
-frame_rate = 10       #Run the streaming at this frame rate. Also used to save the MP4 at the correct fps.
+frame_rate = 20       #Run the streaming at this frame rate. Also used to save the MP4 at the correct fps.
 
 #Constants for the recording settings
 max_recording_duration = 20 # seconds
-min_gap_between_video_start = 60 # seconds
+min_gap_between_video_start = 60 * 60 # seconds
 videos_directory = str(ROOT / 'videos')             #local directory on Raspberry Pi
 s3_videos_bucket_name = 'guardianberry.videos'      #AWS S3 bucket name for videos
 images_directory = str(ROOT / 'images')             #local directory on Raspberry Pi
@@ -65,6 +65,7 @@ def run():
     if not os.path.exists(videos_directory):
         os.mkdir(videos_directory)
 
+
     vid_writer = None
     save_path_and_file = None
     is_recording = False
@@ -72,7 +73,9 @@ def run():
     people_found = 0
     confidence = 0
     inference_time_ms = None
-    image_buffer = []
+    frame_count = 0
+    bg_frame = None
+    last_frame = None
 
     # Run inference
     model.warmup(imgsz = (1, 3, *imgsz))  # warmup
@@ -84,13 +87,14 @@ def run():
         # Version 2: only use the model to detect persons if not already recording, otherwise continue recording.
         if is_recording:
 
+            im0 = im0s[0].copy()
+
             #We are recording. See if we should continue.
             if time.time() - recording_start_time < max_recording_duration:
                 #Duration OK
-                im0 = im0s[i].copy()
 
-                #Test if last frame_rate frames * 2 are the same (to give a 2 sec image_buffer at end of movement)
-                if len(image_buffer) == (frame_rate * 2) and images_are_similar(im0, image_buffer[frame_rate * 2 - 1]):
+                #Every second, test if this frame is similar to bg frame
+                if (frame_count % frame_rate == 0) and image_is_similar_to_bg(im0, bg_frame):
                     #Stop recording
                     is_recording = False
                     vid_writer.release()
@@ -99,9 +103,9 @@ def run():
                     recording_msg += upload_videos_to_aws()
 
                 else:
+                    #Write another frame
                     vid_writer.write(im0)
-                    image_buffer = [im0] + image_buffer                 #prepend image_buffer with this image
-                    image_buffer = image_buffer[:(frame_rate * 2)]      #limit image_buffer length to frame_rate * 2 (ie 2 secs of video)
+                    frame_count += 1
                     recording_msg = 'Continuing recording'
 
             else:
@@ -110,6 +114,7 @@ def run():
                 vid_writer.release()
                 rename_local_file(save_path_and_file, recording_start_time, people_found, confidence, inference_time_ms, im0.shape[1], im0.shape[0])
                 recording_msg = 'Hit max duration of ' + str(max_recording_duration) + 'secs... stopped recording; '
+                recording_msg += str(frame_count) + 'frames; '
                 recording_msg += upload_videos_to_aws()
 
         elif time.time() - recording_start_time > min_gap_between_video_start:
@@ -128,10 +133,10 @@ def run():
             # Process predictions
             for i, det in enumerate(pred):  # per image
 
+                im0 = im0s[i].copy()
+
                 if len(det):
                     #We have detected a person
-                    im0 = im0s[i].copy()
-
                     #Add boxes and person labels to image using annotator
                     annotator = Annotator(im0s[i].copy(), line_width = 3, example = str(names))
 
@@ -160,7 +165,8 @@ def run():
                     people_found = len(det)
                     confidence = float(max_conf)
                     inference_time_ms = dt.dt
-                    image_buffer = [im0]    #Restart image_buffer with this first image
+                    frame_count = 0
+                    bg_frame = setup_background(last_frame)
 
                     if isinstance(vid_writer, cv2.VideoWriter): # Shouldn't be needed but just in case
                         vid_writer.release()
@@ -174,41 +180,39 @@ def run():
                     recording_msg = msg + '; started recording to ' + save_path_and_file
 
                 else:
+                    last_frame = im0
                     recording_msg = 'No person found'
+
+        else:
+            #Waiting til min_gap_between_video_start has passed
+            recording_msg = 'Waiting til min_gap_between_video_start has elasped'
 
         LOGGER.info(recording_msg)
 
 
-#See if images are similar
-def images_are_similar(im0, im1):
-    diff_histogram = image_similarity_histogram(im0, im1)
-    diff_absdiff = image_similarity_diff(im0, im1)
-    LOGGER.info('histogram: ' + str(diff_histogram) + ', absdiff: ' + str(diff_absdiff))
-    return false
+#See if image is similar to bg image
+def image_is_similar_to_bg(im, bg_frame):
+    contour_count = image_similarity_bg_subtract(im, bg_frame)
+    return contour_count <= 2
 
-#See if these 2 images are similar. Use a histogram comparison.
-def image_similarity_histogram(im0, im1):
-    #Calculate the histograms of the images
-    hist0 = cv2.calcHist([im0], [0], None, [256], [0, 256])
-    hist1 = cv2.calcHist([im1], [0], None, [256], [0, 256])
+def setup_background(im):
+    #Gray scale and Blur - similar approach as used in CM3065 ISP
+    gray_frame = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    return cv2.GaussianBlur(gray_frame, (25, 25), 0)
 
-    #Calculate the difference. Bhattacharyya distance.
-    diff = cv2.compareHist(hist0, hist1, cv2.HISTCMP_BHATTACHARYYA)
-    return diff
+def image_similarity_bg_subtract(im, bg_frame):
+    gray_frame = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+    blur_frame = cv2.GaussianBlur(gray_frame, (25, 25), 0)
 
-#See if these 2 images are similar. Use a grayscale differnce calc.
-def image_similarity_diff(im0, im1):
-    #Convert to grayscale
-    gray0 = cv2.cvtColor(im0, cv2.COLOR_BGR2GRAY)
-    gray1 = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
-
-    #Calculate absolute difference between grayscale images
-    diff = cv2.absdiff(gray0, gray1)
-
-    #Calculate the sum of the differences and scale to 0 - 1
-    sum_diff = cv2.sumElems(diff)
-    max_diff = im0.size * 255
-    return sum_diff / max_diff
+    #Calc absolute difference from bg frame (before person detected)
+    delta_frame = cv2.absdiff(bg_frame, blur_frame)
+    
+    #The difference (the delta_frame) is converted into a binary image using the threshold value
+    threshold_frame = cv2.threshold(delta_frame, 20, 255, cv2.THRESH_BINARY)[1]
+    
+    #The cv2.findContours() method identifies all the contours in the image.
+    (contours, _) = cv2.findContours(threshold_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    return len(contours);
 
 #Save this image locally, embedding the metadata in the filename
 def save_image(image, recording_start_time, confidence):
@@ -265,6 +269,11 @@ def upload_videos_to_aws():
 
         #Extract the metadata from the filename
         parts = filename.split('.')[0].split('-')
+
+        #Check file like 1705477931-20-1-84-855-1280-960.mp4 and not 1705474734.mp4
+        if len(parts) != 7:
+            os.remove(file_path)
+            continue
 
         #Create metadata to go with file
         metadata = { 'Metadata': {
