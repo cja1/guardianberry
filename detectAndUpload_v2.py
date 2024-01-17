@@ -90,7 +90,7 @@ def run():
                 im0 = im0s[i].copy()
 
                 #Test if last frame_rate frames * 2 are the same (to give a 2 sec image_buffer at end of movement)
-                if len(buffer) == (frame_rate * 2) and images_are_similar(im0, image_buffer[frame_rate * 2 - 1]):
+                if len(image_buffer) == (frame_rate * 2) and images_are_similar(im0, image_buffer[frame_rate * 2 - 1]):
                     #Stop recording
                     is_recording = False
                     vid_writer.release()
@@ -181,8 +181,8 @@ def run():
 
 #See if images are similar
 def images_are_similar(im0, im1):
-    diff_histogram = image_similarity_histogram(im0, im1):
-    diff_absdiff = image_similarity_diff(im0, im1):
+    diff_histogram = image_similarity_histogram(im0, im1)
+    diff_absdiff = image_similarity_diff(im0, im1)
     LOGGER.info('histogram: ' + str(diff_histogram) + ', absdiff: ' + str(diff_absdiff))
     return false
 

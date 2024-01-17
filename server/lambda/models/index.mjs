@@ -4,7 +4,17 @@ import { basename, dirname } from "path";
 import { Sequelize, DataTypes } from "sequelize";
 import { fileURLToPath } from "url";
 
-const config    = { "host": process.env.host, "dialect": "mysql", "logging": false };
+const config = {
+  "host": process.env.host,
+  "dialect": "mysql",
+  "logging": false,
+  "pool": {
+    "max": 2,
+    "min": 0,
+    "idle": 0,
+    "acquire": 3000
+  }
+};
 var sequelize = new Sequelize(process.env.database, process.env.username, process.env.password, config);
 
 const __filename = fileURLToPath(import.meta.url);

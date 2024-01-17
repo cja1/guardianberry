@@ -130,16 +130,17 @@ import { extractUserMethodAndPath, accessControlHeaders, generatePresignedImageU
 //************************************
 // GET HOMES
 //************************************
-async function getHomes(homeId, userId, isAdmin) {
+async function getHomes(homeId, userId) {
 
   //Get the homes, including the Users, Notifications, Cameras and Events associated with it
   //if !isAdmin then just home for this user (ie home associated with homeId). If admin then all homes.
-  const where = isAdmin ? {} : { id: homeId };
   var out = [];
+
+  const start = +new Date();
+  var intermediate = +new Date();
 
   return await models.Home.findAll({
     attributes: ['uuid', 'name'],
-    where: where,
     include: [
       { model: models.User, attributes: ['id', 'uuid', 'name', 'mobile', 'sendNotifications', 'locale', 'timezone'], required: false, include: [
         { model: models.Notification, attributes:['createdAt'], required: false }
@@ -155,6 +156,8 @@ async function getHomes(homeId, userId, isAdmin) {
     ]
   })
   .then(homes => {
+    console.log('findAll', (+new Date()) - intermediate);
+    intermediate = +new Date();
     //Create output data with counts of events and notifications plus last event date and last notification date
     var imageFilenames = [];
 
@@ -192,6 +195,9 @@ async function getHomes(homeId, userId, isAdmin) {
     return generatePresignedImageUrls(imageFilenames)
   })
   .then(presignedUrls => {
+    console.log('presignedUrls', (+new Date()) - intermediate);
+    intermediate = +new Date();
+
     //Now replace any lastEventImageUrl that are non-null with the presigned URL
     out.forEach((home, i) => {
       home.Cameras.forEach((camera, j) => {
@@ -207,7 +213,112 @@ async function getHomes(homeId, userId, isAdmin) {
     out.forEach((home, i) => {
       out[i].Cameras = home.Cameras.sort((a, b) => b.eventCount - a.eventCount);
     });
+
+    console.log('sorting', (+new Date()) - intermediate);
+    console.log('total', (+new Date()) - start);
     return out;
+  });
+}
+
+//************************************
+// GET HOME
+//************************************
+async function getHome(homeId, userId) {
+
+  //Get the home, including the Users, Notifications, Cameras and Events associated with it
+  const start = +new Date();
+  var intermediate = +new Date();
+  var home;
+
+  return await models.Home.findOne({
+    attributes: ['uuid', 'name'],
+    where: { id: homeId },
+    include: [
+      { model: models.Camera, attributes: ['uuid', 'name', 'rpiSerialNo', 'createdAt'], required: false, include: [
+        { model: models.Event, attributes: ['createdAt', 'imageFilename'], required: false }
+      ]}
+    ],
+    order: [
+      ['name', 'ASC'],
+      [ models.sequelize.col('Cameras.Events.createdAt'), 'DESC' ]
+    ]
+  })
+  .then(thisHome => {
+    console.log('findOne', (+new Date()) - intermediate);
+    intermediate = +new Date();
+    //Create output data with counts of events and notifications plus last event date and last notification date
+    var imageFilenames = [];
+
+    //Convert to POJO
+    home = thisHome.get({ plain: true });
+
+    //Create eventCount, lastEventTimestamp, lastEventImageUrl
+    home.Cameras.forEach((camera, j) => {
+      home.Cameras[j]['createdAt'] = camera.createdAt.getTime() / 1000;
+      home.Cameras[j]['eventCount'] = ('Events' in camera) ? camera.Events.length : 0;
+      home.Cameras[j]['lastEventTimestamp'] = (('Events' in camera) && (camera.Events.length > 0)) ? camera.Events[0].createdAt.getTime() / 1000 : null;
+
+      //Pre-signed URL for image
+      if (('Events' in camera) && (camera.Events.length > 0)) {
+        const imageFilename = camera.Events[0].imageFilename;
+        imageFilenames.push(imageFilename);
+        //Store the imageFilename temporarily. We will replace this once we have the presigned url.
+        home.Cameras[j]['lastEventImageUrl'] = imageFilename;
+      }
+      else {
+        home.Cameras[j]['lastEventImageUrl'] = null;          
+      }
+      delete home.Cameras[j].Events;
+    });
+    return generatePresignedImageUrls(imageFilenames)
+  })
+  .then(presignedUrls => {
+    console.log('presignedUrls', (+new Date()) - intermediate);
+    intermediate = +new Date();
+
+    //Now replace any lastEventImageUrl that are non-null with the presigned URL
+    home.Cameras.forEach((camera, j) => {
+      if (camera.lastEventImageUrl != null) {
+        const imageFilename = camera.lastEventImageUrl;
+        // console.log(camera.lastEventImageUrl, presignedUrls[imageFilename]);
+        home.Cameras[j].lastEventImageUrl = presignedUrls[imageFilename];
+      }
+    });
+
+    //Sort cameras by eventCount descending so cameras with most events appear first
+    home.Cameras = home.Cameras.sort((a, b) => b.eventCount - a.eventCount);
+
+    console.log('sorting cameras', (+new Date()) - intermediate);
+    intermediate = +new Date();
+
+    //Get users for home
+    return models.User.findAll({
+      attributes: ['id', 'uuid', 'name', 'mobile', 'sendNotifications', 'locale', 'timezone'],
+      where: { HomeId: homeId },
+      include: [{ model: models.Notification, attributes:['createdAt'], required: false }],
+      order: [
+        [ models.sequelize.col('Notifications.createdAt'), 'DESC' ]
+      ]
+    });
+  })
+  .then(users => {
+    // Create isMe flag, notificationCount and lastNotificationTimestamp
+    var usersOut = [];
+    users.forEach((user, j) => {
+      user = user.get({ plain: true });
+      user['isMe'] = (user.id == userId);
+      delete user.id;
+      user['notificationCount'] = ('Notifications' in user) ? user.Notifications.length : 0;
+      user['lastNotificationTimestamp'] = (('Notifications' in user) && (user.Notifications.length > 0)) ? user.Notifications[0].createdAt.getTime() / 1000 : null;
+      delete user.Notifications;
+      usersOut.push(user);
+    });
+    home['Users'] = usersOut;
+
+    console.log('findAll users', (+new Date()) - intermediate);
+    intermediate = +new Date();
+    console.log('total', (+new Date()) - start);
+    return home;
   });
 }
 
@@ -227,7 +338,13 @@ export const handler = async (event) => {
     var ret;
     switch (pathParameters.length) {
       case 0:   //like /homes
-        ret = await getHomes(homeId, userId, isAdmin);
+        if (isAdmin) {
+          ret = await getHomes(homeId, userId);
+        }
+        else {
+          ret = await getHome(homeId, userId);
+          ret = [ret];  //Return as array
+        }
         break;
 
       default:
