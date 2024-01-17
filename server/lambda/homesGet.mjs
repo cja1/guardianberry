@@ -142,13 +142,17 @@ async function getHomes(homeId, userId, isAdmin) {
     where: where,
     include: [
       { model: models.User, attributes: ['id', 'uuid', 'name', 'mobile', 'sendNotifications', 'locale', 'timezone'], required: false, include: [
-        { model: models.Notification, attributes:['createdAt'], required: false, order: [['id', 'DESC']] }
+        { model: models.Notification, attributes:['createdAt'], required: false }
       ]},
       { model: models.Camera, attributes: ['uuid', 'name', 'rpiSerialNo', 'createdAt'], required: false, include: [
-        { model: models.Event, attributes: ['createdAt', 'imageFilename'], required: false, order: [['id', 'DESC']] }
+        { model: models.Event, attributes: ['createdAt', 'imageFilename'], required: false }
       ]}
     ],
-    order: [['name', 'ASC']]
+    order: [
+      ['name', 'ASC'],
+      [ models.sequelize.col('Users.Notifications.createdAt'), 'DESC' ],
+      [ models.sequelize.col('Cameras.Events.createdAt'), 'DESC' ]
+    ]
   })
   .then(homes => {
     //Create output data with counts of events and notifications plus last event date and last notification date

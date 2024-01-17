@@ -65,11 +65,12 @@ const CLIENT_ID = 'siq15pbq01rdbdlcsv473kn0k';
 function animateCount(element, upto) {
   //Do count up to values - as an animation
   var count = 0;
-  const waitTimeMs = (upto < 10) ? 100 : ((upto < 100) ? 10 : 4);
+  const waitTimeMs = (upto < 10) ? 100 : ((upto < 100) ? 10 : 2);
+  const increment = (upto < 100) ? 1 : 5;
   const counter = setInterval(() => {
-    count += 1;
+    count += increment;
     element.html(count)
-    if (count == upto) {
+    if (count >= upto) {
       clearInterval(counter);
     }
   }, waitTimeMs);

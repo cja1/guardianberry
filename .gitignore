@@ -11,6 +11,5 @@ server/guardianberry.zip
 server/widdershins.json
 server/lambda/package-lock.json
 server/deploy
-coco/images
 coco/pycocotools
 coco/annotations

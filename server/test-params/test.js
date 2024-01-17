@@ -1,11 +1,10 @@
 module.exports = {
-  "httpMethod": "POST",
+  "httpMethod": "GET",
   "requestContext": {
     "authorizer": {
       "claims": {
-        "cognito:username": "4e7f31e1-01f4-49ec-a651-ea40a5c7e687"
+        "cognito:username": "c0641c6c-a43e-4f8a-88b4-d1b4e46a6cf2"
       }
     }
-  },
-  "body": '{"name": "TEST CAMERA 80","rpiSerialNo": "TEST_SERIAL_NO80","homeUUID":"be859e1f-7e28-4aa5-b19f-27d3cf0558af"}'
+  }
 };
