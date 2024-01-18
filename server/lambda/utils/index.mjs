@@ -8,7 +8,7 @@ import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 
 const S3_BUCKET_IMAGES = 'guardianberry.images';
 const S3_BUCKET_VIDEOS = 'guardianberry.videos';
-const PRESIGNED_URL_EXPIRY = 60; //seconds
+const PRESIGNED_URL_EXPIRY = 60 * 60; //seconds
 
 //Return static access control headers for CORS support
 export function accessControlHeaders() {
