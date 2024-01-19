@@ -13,6 +13,8 @@ import psutil       #for seeing if lib camera running
 import subprocess   #for launching lib camera
 import boto3        #for AWS S3 file uploading
 import uuid         #for generating a random filename
+import datetime     #for current date
+import pytz         #for timezone adjustments
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -34,7 +36,9 @@ frame_rate = 20       #Run the streaming at this frame rate. Also used to save t
 
 #Constants for the recording settings
 max_recording_duration = 20 # seconds
-min_gap_between_video_start = 60 * 60 # seconds
+min_gap_between_video_start = 60 * 60 # seconds. 1 hour too long for production system, but use this for development
+recording_hours = [9, 13] # Only record between these hours - for development system
+
 videos_directory = str(ROOT / 'videos')             #local directory on Raspberry Pi
 s3_videos_bucket_name = 'guardianberry.videos'      #AWS S3 bucket name for videos
 images_directory = str(ROOT / 'images')             #local directory on Raspberry Pi
@@ -117,8 +121,8 @@ def run():
                 recording_msg += str(frame_count) + 'frames; '
                 recording_msg += upload_videos_to_aws()
 
-        elif time.time() - recording_start_time > min_gap_between_video_start:
-            #Have waited long enough between recordings - see if any persons in image
+        elif (time.time() - recording_start_time > min_gap_between_video_start) and is_during_recording_hours():
+            #Have waited long enough between recordings and in recording hours - see if any persons in image
             with dt:    #Use the profiler to time the inference
                 im = torch.from_numpy(im).to(model.device)
                 im = im.float()  # uint8 to fp
@@ -184,11 +188,22 @@ def run():
                     recording_msg = 'No person found'
 
         else:
-            #Waiting til min_gap_between_video_start has passed
-            recording_msg = 'Waiting til min_gap_between_video_start has elasped'
+            if is_during_recording_hours():
+                #Waiting til min_gap_between_video_start has passed
+                recording_msg = 'Waiting til min_gap_between_video_start has elasped'
+            else:
+                recording_msg = ''
 
-        LOGGER.info(recording_msg)
+        if recording_msg != '':
+            LOGGER.info(recording_msg)
 
+
+# See if the time now is between the fixed recording hours
+#DEVELOPMENT ONKY
+def is_during_recording_hours():
+    tz = pytz.timezone("Asia/Singapore")
+    hour = int(datetime.datetime.now(tz = tz).strftime("%H"))
+    return (hour >= recording_hours[0]) and (hour <= recording_hours[1])
 
 #See if image is similar to bg image
 def image_is_similar_to_bg(im, bg_frame):
