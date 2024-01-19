@@ -381,6 +381,14 @@ function getHomes(completionFunction) {
     //Only 1 home ever returned for normal users
     const home = data[0];
     userMe = findUserMe(home.Users);
+
+    //Sort users so userMe is first then alphabetical
+    home.Users = home.Users.sort((a, b) => {
+      if (a.isMe) { return -1; }
+      if (b.isMe) { return 1; }
+      return ((a.name == b.name) ? 0 : ((a.name > b.name) ? 1 : -1));
+    });
+
     $('#pageName').html('Users: ' + home.name);
 
     //Hide spinner and show table
