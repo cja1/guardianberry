@@ -347,7 +347,7 @@ function eventPanel(event) {
         <a href="delete_[EVENT_UUID]" class="btn btn-outline-danger deleteEvent">Delete event</a> \
         <p class="card-text mt-2 text-end"> \
           <span class="badge rounded-pill bg-danger [VIEWED]" id="badge_viewed_[EVENT_UUID]">Viewed</span> <span class="badge rounded-pill bg-success [NOT_VIEWED]" id="badge_not_viewed_[EVENT_UUID]">To view</span> \
-          <span class="badge rounded-pill bg-info">[MAX_PEOPLE_FOUND] found</span> <span class="badge rounded-pill bg-warning">[MAX_CONFIDENCE]% confidence</span> \
+          <span class="badge rounded-pill bg-info">[DURATION]</span> <span class="badge rounded-pill bg-warning">[MAX_CONFIDENCE]% confidence</span> \
         </p> \
       </div> \
     </div> \
@@ -370,8 +370,8 @@ function eventPanel(event) {
     html = html.replace('[VIEWED]', 'd-none');
     html = html.replace('[NOT_VIEWED]', '');
   }
+  html = html.replace('[DURATION]', event.duration + ' ' + ((event.duration == 1) ? 'second' : 'seconds'));
   html = html.replace('[MAX_CONFIDENCE]', event.maxConfidence);
-  html = html.replace('[MAX_PEOPLE_FOUND]', event.maxPeopleFound + ' ' + ((event.maxPeopleFound == 1) ? 'person' : 'people'));
   return html;
 }
 

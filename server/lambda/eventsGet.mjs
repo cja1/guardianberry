@@ -115,10 +115,6 @@ import validator from 'validator';
  *           type: integer
  *           description: The video length in seconds
  *           example: 20
- *         maxPeopleFound:
- *           type: integer
- *           description: The maximum number of people detected during this event
- *           example: 2
  *         maxConfidence:
  *           type: integer
  *           description: The maximum confidence there was a person detected during any frame of this event, 0-100
@@ -167,9 +163,10 @@ async function getEvents(homeId) {
   const start = +new Date();
   var intermediate = +new Date();
 
-  //Get all events for this Home (associated via Camera)
+  //Get all events for this Home (associated via Camera). Skip events with no videoFilename set (ie video not yet uploaded)
   return await models.Event.findAll({
-    attributes: ['uuid', 'isViewed', 'imageFilename', 'recordingStartTime', 'duration', 'maxPeopleFound', 'maxConfidence'],
+    attributes: ['uuid', 'isViewed', 'imageFilename', 'recordingStartTime', 'duration', 'maxConfidence'],
+    where: { videoFilename: { [models.Sequelize.Op.ne]: null } },
     include: [
       { model: models.Camera, attributes: ['uuid'], required: true, where: { HomeId: homeId }}
     ],

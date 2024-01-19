@@ -10,7 +10,7 @@ async function updateEvent(event, fileKey, metadata) {
 		model: metadata.model,
 		frameRate: parseInt(metadata.frame_rate),
 		confidenceThreshold: parseFloat(metadata.confidence_threshold),
-		duration: parseInt(metadata.duration_s),
+		duration: parseInt(metadata.duration_s) * 14 / 20,
 		maxPeopleFound: parseInt(metadata.max_people_found),
 		maxConfidence: parseInt(metadata.max_confidence),
 		inferenceTime: parseInt(metadata.inference_time_ms),
