@@ -35,9 +35,9 @@ stream_url = 'tcp://127.0.0.1:8888' #Run lib camera on the localhost port 8888
 frame_rate = 20       #Run the streaming at this frame rate. Also used to save the MP4 at the correct fps.
 
 #Constants for the recording settings
-max_recording_duration = 20 # seconds
-min_gap_between_video_start = 60 * 60 # seconds. 1 hour too long for production system, but use this for development
-recording_hours = [9, 13] # Only record between these hours - for development system
+max_recording_duration = 25 # seconds
+min_gap_between_video_start = 60 # seconds. 1 hour too long for production system, but use this for development
+recording_hours = [9, 20] # Only record between these hours - for development system
 
 videos_directory = str(ROOT / 'videos')             #local directory on Raspberry Pi
 s3_videos_bucket_name = 'guardianberry.videos'      #AWS S3 bucket name for videos

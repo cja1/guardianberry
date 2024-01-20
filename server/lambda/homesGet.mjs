@@ -235,7 +235,7 @@ async function getHome(homeId, userId) {
     where: { id: homeId },
     include: [
       { model: models.Camera, attributes: ['uuid', 'name', 'rpiSerialNo', 'createdAt'], required: false, include: [
-        { model: models.Event, attributes: ['createdAt', 'imageFilename'], required: false }
+        { model: models.Event, attributes: ['createdAt', 'imageFilename'], required: false, where: { videoFilename: { [models.Sequelize.Op.ne]: null } } }
       ]}
     ],
     order: [
