@@ -13,3 +13,4 @@ server/lambda/package-lock.json
 server/deploy
 coco/pycocotools
 coco/annotations
+test-events
