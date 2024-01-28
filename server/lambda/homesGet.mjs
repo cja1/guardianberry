@@ -230,17 +230,25 @@ async function getHome(homeId, userId) {
   var intermediate = +new Date();
   var home;
 
+  //Just events in the last 90 days
+  const daysAgo = new Date(new Date().setDate(new Date().getDate() - 90));
+
   return await models.Home.findOne({
     attributes: ['uuid', 'name'],
     where: { id: homeId },
     include: [
       { model: models.Camera, attributes: ['uuid', 'name', 'rpiSerialNo', 'createdAt'], required: false, include: [
-        { model: models.Event, attributes: ['createdAt', 'imageFilename'], required: false, where: { videoFilename: { [models.Sequelize.Op.ne]: null } } }
+        { model: models.Event, attributes: ['recordingStartTime', 'imageFilename'], required: false,
+          where: {
+            videoFilename: { [models.Sequelize.Op.ne]: null },
+            recordingStartTime: { [models.Sequelize.Op.gt]: daysAgo, [models.Sequelize.Op.lt]: new Date() }
+          }
+        }
       ]}
     ],
     order: [
       ['name', 'ASC'],
-      [ models.sequelize.col('Cameras.Events.createdAt'), 'DESC' ]
+      [ models.sequelize.col('Cameras.Events.recordingStartTime'), 'DESC' ]
     ]
   })
   .then(thisHome => {
@@ -256,7 +264,7 @@ async function getHome(homeId, userId) {
     home.Cameras.forEach((camera, j) => {
       home.Cameras[j]['createdAt'] = camera.createdAt.getTime() / 1000;
       home.Cameras[j]['eventCount'] = ('Events' in camera) ? camera.Events.length : 0;
-      home.Cameras[j]['lastEventTimestamp'] = (('Events' in camera) && (camera.Events.length > 0)) ? camera.Events[0].createdAt.getTime() / 1000 : null;
+      home.Cameras[j]['lastEventTimestamp'] = (('Events' in camera) && (camera.Events.length > 0)) ? camera.Events[0].recordingStartTime.getTime() / 1000 : null;
 
       //Pre-signed URL for image
       if (('Events' in camera) && (camera.Events.length > 0)) {

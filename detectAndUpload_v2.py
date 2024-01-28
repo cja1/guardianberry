@@ -36,8 +36,8 @@ frame_rate = 20       #Run the streaming at this frame rate. Also used to save t
 
 #Constants for the recording settings
 max_recording_duration = 20 # seconds
-min_gap_between_video_start = 60 * 60 # seconds. 1 hour too long for production system, but use this for development
-recording_hours = [9, 12] # Only record between these hours - for development system
+min_gap_between_video_start = 60 # seconds. 1 hour too long for production system, but use this for development
+recording_hours = [7, 22] # Only record between these hours - for development system
 
 videos_directory = str(ROOT / 'videos')             #local directory on Raspberry Pi
 s3_videos_bucket_name = 'guardianberry.videos'      #AWS S3 bucket name for videos

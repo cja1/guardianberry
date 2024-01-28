@@ -164,9 +164,15 @@ async function getEvents(homeId) {
   var intermediate = +new Date();
 
   //Get all events for this Home (associated via Camera). Skip events with no videoFilename set (ie video not yet uploaded)
+  //Just events for last 90 days
+  const daysAgo = new Date(new Date().setDate(new Date().getDate() - 90));
+
   return await models.Event.findAll({
     attributes: ['uuid', 'isViewed', 'imageFilename', 'recordingStartTime', 'duration', 'maxConfidence'],
-    where: { videoFilename: { [models.Sequelize.Op.ne]: null } },
+    where: {
+      videoFilename: { [models.Sequelize.Op.ne]: null },
+      recordingStartTime: { [models.Sequelize.Op.gt]: daysAgo, [models.Sequelize.Op.lt]: new Date() }
+    },
     include: [
       { model: models.Camera, attributes: ['uuid'], required: true, where: { HomeId: homeId }}
     ],
