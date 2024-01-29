@@ -10,6 +10,7 @@ server/swagger*.*
 server/guardianberry.zip
 server/widdershins.json
 server/lambda/package-lock.json
+server/lambda/updateMetadata.mjs
 server/deploy
 coco/pycocotools
 coco/annotations

@@ -4,10 +4,17 @@
 
 import models from '../models/index.mjs';
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3, S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import { readFileSync, createWriteStream, statSync } from "fs"
+import axios from 'axios';
+
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegPath from '@ffmpeg-installer/ffmpeg';
+ffmpeg.setFfmpegPath(ffmpegPath.path);
 
 const S3_BUCKET_IMAGES = 'guardianberry.images';
 const S3_BUCKET_VIDEOS = 'guardianberry.videos';
+
 const PRESIGNED_URL_EXPIRY = 60 * 60; //seconds
 
 //Return static access control headers for CORS support
@@ -162,4 +169,69 @@ export async function generatePresignedImageAndVideoUrl(imageKey, videoKey) {
     const videoUrl = response[videoKey];
     return [imageUrl, videoUrl];
   });
+}
+
+export async function addMetadataToVideoFile(metadata, videoKey) {
+  const localPath = '/tmp/' + videoKey;
+  const localPathWithMetadata = '/tmp/edited-' + videoKey;
+
+  //Get presigned URL first
+  const url = await generatePresignedVideoUrl(videoKey);
+
+  //Download to local file
+  const response = await axios.get(url, { responseType: 'stream' });
+  const writer = createWriteStream(localPath);
+  response.data.pipe(writer);
+  await new Promise((resolve, reject) => {
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+  });
+
+  //Check file size is non-zero
+  const stats = statSync(localPath);
+  if (stats.size == 0) {
+    //Skip file
+    return;
+  }
+
+  // //Get metadata
+  // const s3 = new S3({ region: 'eu-west-1' });
+  // const metadata = await s3.headObject({ Bucket: S3_BUCKET_VIDEOS, Key: videoKey });
+
+  //Create array with metadata
+  var options = [];
+  for (var key in metadata.Metadata) {
+    if (key == 'recording_start_time') {  //skip time as we use the upload time rather than being reliant on Raspberry Pi time
+      continue;
+    }
+    options.push(key + ': ' + metadata.Metadata[key]);
+  }
+  const title = options.join(', ');
+  // console.log(title);
+
+  //Save metadata to title in new local file
+ await new Promise((resolve, reject) => {
+   ffmpeg(localPath)
+    .outputOptions('-metadata', 'title="' + title + '"')
+    .save(localPathWithMetadata)
+    .on('end', () => {
+      // console.log('wrote file with metadata', localPathWithMetadata);
+      resolve();
+    })
+    .on('error', (err) => {
+      console.error('Error processing file', err);
+      reject(err);
+    });
+  });
+
+  //Save back to S3
+  const data = readFileSync(localPathWithMetadata);
+  const client = new S3Client();
+  await client.send(new PutObjectCommand({ 
+    Bucket: S3_BUCKET_VIDEOS,
+    Key: videoKey,
+    Body: data,
+    Metadata: metadata.Metadata
+  }));
+
 }

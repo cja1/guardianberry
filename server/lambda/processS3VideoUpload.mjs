@@ -1,4 +1,5 @@
 import models from './models/index.mjs';
+import { addMetadataToVideoFile } from './utils/index.mjs';
 import { S3 } from "@aws-sdk/client-s3";
 const s3 = new S3({ region: 'eu-west-1' });
 
@@ -50,7 +51,14 @@ export const handler = async (event) => {
     }
     console.log('Found event id', event.id, 'for rpiSerialNo', rpiSerialNo, 'and recordingStartTime', recordingStartTime);
 
+    //Update database event object
   	await updateEvent(event, fileKey, metadata.Metadata);
+    console.log('Updated event id', event.id);
+
+    //Save metadata to file using ffmpeg - do it here to avoid putting more processing effort on RPi.
+    await addMetadataToVideoFile(metadata, fileKey);
+    console.log('Added metadata to video file', fileKey);
+
     return {
       statusCode: 200,
       body: 'Existing event updated'
