@@ -35,9 +35,9 @@ stream_url = 'tcp://127.0.0.1:8888' #Run lib camera on the localhost port 8888
 frame_rate = 20       #Run the streaming at this frame rate. Also used to save the MP4 at the correct fps.
 
 #Constants for the recording settings
-max_recording_duration = 20 # seconds
+max_recording_duration = 22 # seconds
 min_gap_between_video_start = 60 # seconds. 1 hour too long for production system, but use this for development
-recording_hours = [7, 22] # Only record between these hours - for development system
+recording_hours = [7, 18] # Only record between these hours - for development system
 
 videos_directory = str(ROOT / 'videos')             #local directory on Raspberry Pi
 s3_videos_bucket_name = 'guardianberry.videos'      #AWS S3 bucket name for videos
@@ -80,6 +80,7 @@ def run():
     frame_count = 0
     bg_frame = None
     last_frame = None
+    last_message_print = 0
 
     # Run inference
     model.warmup(imgsz = (1, 3, *imgsz))  # warmup
@@ -170,7 +171,8 @@ def run():
                     confidence = float(max_conf)
                     inference_time_ms = dt.dt
                     frame_count = 0
-                    bg_frame = setup_background(last_frame)
+                    if last_frame is not None:
+                        bg_frame = setup_background(last_frame)
 
                     if isinstance(vid_writer, cv2.VideoWriter): # Shouldn't be needed but just in case
                         vid_writer.release()
@@ -181,7 +183,7 @@ def run():
                     #Write and upload to AWS this first image (plus any other images)
                     save_image(im0, recording_start_time, confidence)
                     upload_images_to_aws()
-                    recording_msg = msg + '; started recording to ' + save_path_and_file
+                    recording_msg = msg + 'started recording to ' + save_path_and_file
 
                 else:
                     last_frame = im0
@@ -194,12 +196,13 @@ def run():
             else:
                 recording_msg = ''
 
-        if recording_msg != '':
+        if recording_msg != '' and time.time() - last_message_print >= 1.0:
             LOGGER.info(recording_msg)
+            last_message_print = time.time()
 
 
 # See if the time now is between the fixed recording hours
-#DEVELOPMENT ONKY
+#DEVELOPMENT ONLY
 def is_during_recording_hours():
     tz = pytz.timezone("Asia/Singapore")
     hour = int(datetime.datetime.now(tz = tz).strftime("%H"))
@@ -207,6 +210,8 @@ def is_during_recording_hours():
 
 #See if image is similar to bg image
 def image_is_similar_to_bg(im, bg_frame):
+    if im is None or bg_frame is None:
+        return False
     contour_count = image_similarity_bg_subtract(im, bg_frame)
     return contour_count <= 2
 
@@ -306,6 +311,7 @@ def upload_videos_to_aws():
         }}
 
         try:
+
             # Upload the file with a random filename (use a v4 uuid)
             s3.upload_file(file_path, s3_videos_bucket_name, str(uuid.uuid4()) + '.mp4', metadata)
             msg += [parts[0] + '.mp4' + ' uploaded to S3']

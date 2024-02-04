@@ -55,9 +55,15 @@ export const handler = async (event) => {
   	await updateEvent(event, fileKey, metadata.Metadata);
     console.log('Updated event id', event.id);
 
-    //Save metadata to file using ffmpeg - do it here to avoid putting more processing effort on RPi.
-    await addMetadataToVideoFile(metadata, fileKey);
-    console.log('Added metadata to video file', fileKey);
+    //If haven't added metadata to file using ffmpeg, do it here
+    if (!('have_stored_metadata' in metadata.Metadata)) {
+      //Save metadata to file using ffmpeg - do it here to avoid putting more processing effort on RPi.
+      await addMetadataToVideoFile(metadata, fileKey);
+      console.log('Added metadata to video file', fileKey);      
+    }
+    else {
+      console.log('Metadata already added to video file', fileKey);            
+    }
 
     return {
       statusCode: 200,

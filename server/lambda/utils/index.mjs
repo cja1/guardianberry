@@ -224,14 +224,16 @@ export async function addMetadataToVideoFile(metadata, videoKey) {
     });
   });
 
-  //Save back to S3
+  //Save back to S3. Add a flag to indicate have stored metadata.
   const data = readFileSync(localPathWithMetadata);
   const client = new S3Client();
+  var obj = metadata.Metadata;
+  obj['have_stored_metadata'] = '1';
   await client.send(new PutObjectCommand({ 
     Bucket: S3_BUCKET_VIDEOS,
     Key: videoKey,
     Body: data,
-    Metadata: metadata.Metadata
+    Metadata: obj
   }));
 
 }
